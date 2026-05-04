@@ -1,0 +1,15 @@
+{
+  "name": "leap-importer",
+  "version": "1.0.0",
+  "description": "Local GUI tool for importing course content into LEAP LMS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "install-browsers": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "archiver": "^6.0.1",
+    "playwright": "^1.40.0"
+  }
+}

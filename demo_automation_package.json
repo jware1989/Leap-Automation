@@ -1,0 +1,698 @@
+{
+  "course": {
+    "title": "Test Automation — Full Slide Type Coverage",
+    "industry": "General",
+    "audience": "",
+    "ce_minutes": 60,
+    "units": [
+      {
+        "unit_id": "unit_1",
+        "title": "Unit 1 — Foundational Concepts",
+        "lessons": [
+          {
+            "lesson_id": "lesson_1",
+            "title": "Test Automation - 1",
+            "lesson_objective": "*Demonstrate all supported slide types including multiple choice and feedback by choice configurations.",
+            "industry": "General",
+            "estimated_minutes": 20,
+            "states": "",
+            "slides": [
+              {
+                "slide_name": "Introduction to Automation Concepts",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "content": "<h2>What Is Automation?</h2><p>Automation is the use of technology to perform tasks that would otherwise require manual effort. In a business context, automation reduces the time spent on repetitive work, minimizes human error, and allows teams to focus on higher-value activities.</p><p>There are two primary categories of automation relevant to this course:</p><ul><li><strong>Process automation</strong> — sequences of steps executed by a system without manual intervention</li><li><strong>Content automation</strong> — the structured generation or population of content from a defined data source</li></ul><p>Both categories share a common requirement: the underlying data must be accurate, complete, and consistently structured before automation can produce reliable results.</p>",
+                "flags": []
+              },
+              {
+                "slide_name": "Multiple Choice — Question Feedback (Standard)",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "multiple_choice",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "Which of the following best describes the primary benefit of process automation in a business environment?",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "It eliminates the need for human oversight once deployed",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "B",
+                    "text": "It reduces time spent on repetitive tasks and minimizes manual error",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "C",
+                    "text": "It replaces all decision-making with system-generated outputs",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "D",
+                    "text": "It guarantees that all outputs are accurate without validation",
+                    "is_correct": false,
+                    "feedback": null
+                  }
+                ],
+                "correct_feedback": "Correct. Automation reduces manual effort and error on repetitive tasks, but it still requires human oversight and validation to ensure outputs meet quality standards.",
+                "incorrect_feedback": "Automation supports human work — it does not replace oversight. Focus on what automation reduces rather than what it eliminates entirely.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Multiple Choice — Feedback by Choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "multiple_choice",
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "A team wants to automate a content import process. Which condition must be true before automation can produce reliable results?",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "The team must have a developer on staff to maintain the automation",
+                    "is_correct": false,
+                    "feedback": "Developer involvement is helpful but not the primary requirement for reliable automation output. The data itself must be correctly structured first."
+                  },
+                  {
+                    "label": "B",
+                    "text": "The underlying data must be accurate, complete, and consistently structured",
+                    "is_correct": true,
+                    "feedback": "Correct. Automation amplifies whatever is in the source data. If the data is clean and consistently structured, the output will be reliable."
+                  },
+                  {
+                    "label": "C",
+                    "text": "The automation must be tested in a production environment first",
+                    "is_correct": false,
+                    "feedback": "Testing in production introduces risk. The correct approach is to validate data quality and test in a safe environment before running against production systems."
+                  },
+                  {
+                    "label": "D",
+                    "text": "All manual processes must be eliminated before automation is introduced",
+                    "is_correct": false,
+                    "feedback": "Automation and manual processes can coexist. Eliminating all manual steps is not a prerequisite — in fact, some steps benefit from remaining manual."
+                  }
+                ],
+                "correct_feedback": "Correct. Clean, consistently structured data is the foundation of reliable automation.",
+                "incorrect_feedback": "Review the conditions required before automation can produce reliable results.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "True or False — Standard Labels, Question Feedback",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "true_false",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Identify whether each statement about automation is <strong>True</strong> or <strong>False</strong>.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Automation can reduce the time spent on repetitive manual tasks.",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "B",
+                    "text": "Once deployed, an automated process requires no ongoing human oversight.",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "C",
+                    "text": "Data quality directly affects the reliability of automation outputs.",
+                    "is_correct": true,
+                    "feedback": null
+                  }
+                ],
+                "correct_feedback": "Correct. Automation reduces effort on repetitive tasks and depends on clean data, but it still requires human oversight to remain reliable.",
+                "incorrect_feedback": "Review the core principles of automation. Focus on what automation improves versus what it cannot replace.",
+                "correct_score": 0,
+                "incorrect_score": 0,
+                "true_label": "True",
+                "false_label": "False"
+              },
+              {
+                "slide_name": "True or False — Feedback by Choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "true_false",
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Read each statement and select whether it <strong>Applies</strong> or <strong>Does Not Apply</strong> to content automation best practices.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Source data should be validated before an automated import is run.",
+                    "is_correct": true,
+                    "feedback": "Correct. Validating source data before running automation prevents errors from being propagated at scale across all outputs."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Automation outputs should be accepted as final without spot-checking.",
+                    "is_correct": false,
+                    "feedback": "Incorrect. Spot-checking automation outputs is a best practice. Automation can introduce systematic errors that only become visible through manual review."
+                  },
+                  {
+                    "label": "C",
+                    "text": "A failed automation run should be logged with enough detail to diagnose the cause.",
+                    "is_correct": true,
+                    "feedback": "Correct. Detailed failure logging is essential for diagnosing and resolving automation issues quickly and accurately."
+                  }
+                ],
+                "correct_feedback": "Well done. You correctly identified all three best practices.",
+                "incorrect_feedback": "Review automation best practices and consider what happens when errors go undetected at each stage.",
+                "correct_score": 0,
+                "incorrect_score": 0,
+                "true_label": "Applies",
+                "false_label": "Does Not Apply"
+              },
+              {
+                "slide_name": "Matching — Core Automation Terms",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "matching",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Match each automation term to its correct definition.</p>",
+                "options": [
+                  { "label": "A", "text": "Process automation", "match": "Executing a sequence of steps by a system without manual intervention" },
+                  { "label": "B", "text": "Content automation", "match": "Generating or populating content from a structured data source" },
+                  { "label": "C", "text": "Validation", "match": "Confirming that outputs meet expected standards before use" },
+                  { "label": "D", "text": "Run log", "match": "A persistent record of each step completed during an automated run" }
+                ],
+                "correct_feedback": "Correct. You matched all four automation terms to their definitions accurately.",
+                "incorrect_feedback": "Review each definition carefully. Focus on what each term describes in the context of an automated workflow.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Sort — Automation Phases",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "sorting",
+                "question_body": "<p>Sort each activity into the correct phase of an automation workflow.</p>",
+                "categories": ["Before Running", "After Running"],
+                "items": [
+                  { "label": "A", "text": "Validate source data for accuracy and completeness", "correct_category": "Before Running" },
+                  { "label": "B", "text": "Confirm all required fields are present in the input file", "correct_category": "Before Running" },
+                  { "label": "C", "text": "Test the automation against a small sample dataset", "correct_category": "Before Running" },
+                  { "label": "D", "text": "Spot-check a sample of outputs for accuracy", "correct_category": "After Running" },
+                  { "label": "E", "text": "Archive the run log for audit and reference", "correct_category": "After Running" },
+                  { "label": "F", "text": "Review failure screenshots to diagnose any errors", "correct_category": "After Running" }
+                ],
+                "correct_feedback": "Correct. You sorted every activity into the right phase of the automation workflow.",
+                "incorrect_feedback": "Think about whether each activity is a preparation step or a review step.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "unit_id": "unit_2",
+        "title": "Unit 2 — Data Quality",
+        "lessons": [
+          {
+            "lesson_id": "lesson_2",
+            "title": "Test Automation - 2",
+            "lesson_objective": "*Apply data quality principles across multiple slide types including feedback by choice configurations.",
+            "industry": "General",
+            "estimated_minutes": 20,
+            "states": "",
+            "slides": [
+              {
+                "slide_name": "The Role of Data Quality in Automation",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "content": "<h2>Why Data Quality Determines Automation Success</h2><p>Automation amplifies whatever is in the source data. A process that runs correctly against clean data will produce reliable results at scale. The same process run against inaccurate or incomplete data will produce unreliable results at scale — and do so faster than any manual process could.</p><p>The four dimensions of data quality that matter most for automation are:</p><ol><li><strong>Accuracy</strong> — Is the data correct and free from errors?</li><li><strong>Completeness</strong> — Are all required fields and values present?</li><li><strong>Consistency</strong> — Does the data follow the same format and conventions throughout?</li><li><strong>Timeliness</strong> — Is the data current enough to produce valid outputs?</li></ol><p>Each dimension can fail independently. A dataset can be accurate but incomplete, or consistent but outdated. Reliable automation requires all four to be maintained together.</p>",
+                "flags": []
+              },
+              {
+                "slide_name": "Multiple Choice — Data Quality Standard Feedback",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "multiple_choice",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "A content import automation run produces incorrect outputs across every lesson in a course. The automation logic ran without errors. What is the most likely cause?",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "The automation tool has a software defect",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "B",
+                    "text": "The source data contained errors that were propagated at scale",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "C",
+                    "text": "The output format is incompatible with the destination system",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "D",
+                    "text": "The run log was not written during the process",
+                    "is_correct": false,
+                    "feedback": null
+                  }
+                ],
+                "correct_feedback": "Correct. When automation logic runs without errors but outputs are wrong, the problem is almost always in the source data. Automation propagates errors at the same scale as correct data.",
+                "incorrect_feedback": "When automation logic completes without errors, focus on the input rather than the tool. Errors in source data are the most common cause of systematic output failures.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Multiple Choice — Data Dimensions Feedback by Choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "multiple_choice",
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "Which data quality dimension is most directly affected when a required field is missing from a record in an automation input file?",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Accuracy",
+                    "is_correct": false,
+                    "feedback": "Accuracy refers to whether the data values are correct, not whether fields are present. A missing field is a completeness issue rather than an accuracy issue."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Completeness",
+                    "is_correct": true,
+                    "feedback": "Correct. Completeness measures whether all required fields and values are present. A missing required field is a direct completeness failure."
+                  },
+                  {
+                    "label": "C",
+                    "text": "Consistency",
+                    "is_correct": false,
+                    "feedback": "Consistency refers to whether data follows the same format and conventions throughout the dataset. A missing field is not a consistency issue."
+                  },
+                  {
+                    "label": "D",
+                    "text": "Timeliness",
+                    "is_correct": false,
+                    "feedback": "Timeliness refers to whether the data is current enough to be useful. A missing field is not related to when the data was recorded."
+                  }
+                ],
+                "correct_feedback": "Correct. A missing required field is a completeness failure.",
+                "incorrect_feedback": "Review the four data quality dimensions and consider which one specifically addresses whether fields and values are present.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "True or False — Data Quality Standard Labels",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "true_false",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Determine whether each of the following statements about data quality is <strong>True</strong> or <strong>False</strong>.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "A dataset can be accurate but still fail a completeness check.",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "B",
+                    "text": "Consistency errors occur when data values are factually incorrect.",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "C",
+                    "text": "Timeliness failures can cause automation to produce valid but outdated outputs.",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "D",
+                    "text": "Fixing data errors after an automation run is always more efficient than preventing them.",
+                    "is_correct": false,
+                    "feedback": null
+                  }
+                ],
+                "correct_feedback": "Correct. You evaluated all four data quality statements accurately.",
+                "incorrect_feedback": "Review each dimension independently. Accuracy, completeness, consistency, and timeliness describe different types of data failure.",
+                "correct_score": 0,
+                "incorrect_score": 0,
+                "true_label": "True",
+                "false_label": "False"
+              },
+              {
+                "slide_name": "True or False — Data Quality Feedback by Choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "true_false",
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Select <strong>Correct</strong> or <strong>Incorrect</strong> for each statement about data quality best practices.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Preventive data quality measures are generally more efficient than corrective ones.",
+                    "is_correct": true,
+                    "feedback": "Correct. Preventing errors at the point of entry is almost always faster and cheaper than identifying and correcting them after they have propagated through a system."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Consistency checks compare a value against an external reference database.",
+                    "is_correct": false,
+                    "feedback": "Incorrect. Consistency checks compare data values within or across internal datasets to confirm they follow the same format and conventions — not against external databases."
+                  },
+                  {
+                    "label": "C",
+                    "text": "Required field validation is an example of a preventive data quality measure.",
+                    "is_correct": true,
+                    "feedback": "Correct. Required field validation prevents incomplete records from entering the system, stopping a completeness failure before it can occur."
+                  },
+                  {
+                    "label": "D",
+                    "text": "An outdated record is always inaccurate.",
+                    "is_correct": false,
+                    "feedback": "Incorrect. An outdated record may have been accurate when it was recorded. Timeliness and accuracy are separate dimensions — a record can be historically correct but no longer current."
+                  }
+                ],
+                "correct_feedback": "Well done. You correctly evaluated all four data quality statements.",
+                "incorrect_feedback": "Review the distinctions between preventive and corrective measures and between the four data quality dimensions.",
+                "correct_score": 0,
+                "incorrect_score": 0,
+                "true_label": "Correct",
+                "false_label": "Incorrect"
+              },
+              {
+                "slide_name": "Matching — Data Quality Dimensions",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "matching",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Match each data quality dimension to the failure it describes.</p>",
+                "options": [
+                  { "label": "A", "text": "Accuracy", "match": "A contact record contains a phone number that was entered incorrectly" },
+                  { "label": "B", "text": "Completeness", "match": "A course record is missing the required lesson objective field" },
+                  { "label": "C", "text": "Consistency", "match": "The same learner is listed under two different name formats across two systems" },
+                  { "label": "D", "text": "Timeliness", "match": "A pricing file reflects rates from six months ago and is no longer current" }
+                ],
+                "correct_feedback": "Correct. You matched every data quality dimension to the failure it best describes.",
+                "incorrect_feedback": "Focus on what type of problem each scenario describes — is it wrong, missing, conflicting, or outdated?",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Sort — Preventive vs Corrective",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "sorting",
+                "question_body": "<p>Sort each action as either <strong>Preventive</strong> (stops errors before they occur) or <strong>Corrective</strong> (fixes errors after they occur).</p>",
+                "categories": ["Preventive", "Corrective"],
+                "items": [
+                  { "label": "A", "text": "Add required field validation to all input forms", "correct_category": "Preventive" },
+                  { "label": "B", "text": "Use dropdown menus to restrict input to approved values", "correct_category": "Preventive" },
+                  { "label": "C", "text": "Run a deduplication script on existing records", "correct_category": "Corrective" },
+                  { "label": "D", "text": "Audit and update outdated records in the system", "correct_category": "Corrective" },
+                  { "label": "E", "text": "Train staff on correct data entry standards before go-live", "correct_category": "Preventive" },
+                  { "label": "F", "text": "Merge duplicate accounts identified during a data review", "correct_category": "Corrective" }
+                ],
+                "correct_feedback": "Correct. You accurately categorized every action as either preventive or corrective.",
+                "incorrect_feedback": "Think about whether the action stops a problem before it happens or addresses one that already exists.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "unit_id": "unit_3",
+        "title": "Unit 3 — Application and Review",
+        "lessons": [
+          {
+            "lesson_id": "lesson_3",
+            "title": "Test Automation - 3",
+            "lesson_objective": "*Apply automation and data quality concepts across all slide types including feedback by choice on true/false and multiple choice.",
+            "industry": "General",
+            "estimated_minutes": 20,
+            "states": "",
+            "slides": [
+              {
+                "slide_name": "Applying Automation and Data Quality",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "content": "<h2>Putting It All Together</h2><p>In this final lesson you will apply both automation principles and data quality concepts to real-world scenarios. The activities cover every slide type supported by the importer and include examples of standard feedback, feedback by choice, and custom true/false labels.</p><p>As you work through each activity keep these principles in mind:</p><ul><li>Automation amplifies what is in the source data — quality in, quality out</li><li>Preventive measures are more efficient than corrective ones</li><li>Human oversight remains necessary even in fully automated workflows</li><li>Logs and artifacts are your primary diagnostic tools when something goes wrong</li></ul>",
+                "flags": []
+              },
+              {
+                "slide_name": "Key Concepts Before Final Activities",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "content": "<h2>Key Reminders</h2><p>Before completing the final activities, review these core takeaways from across the course.</p><blockquote><p><em>A well-structured process built on clean data and validated outputs is more reliable than any amount of manual effort applied to a poorly structured one.</em></p></blockquote><p>The goal of automation is not to remove human judgment — it is to apply human judgment less frequently, at the right moments, with better information.</p>",
+                "flags": []
+              },
+              {
+                "slide_name": "Multiple Choice — Applied Scenario Standard Feedback",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "multiple_choice",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "An automated content import runs successfully but a reviewer notices that feedback fields are blank on all multiple choice slides. The run log shows no errors. What is the most likely cause?",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "The automation tool does not support feedback fields on multiple choice slides",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "B",
+                    "text": "The correct_feedback and incorrect_feedback fields were missing from the source JSON",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "C",
+                    "text": "The feedback fields require a separate manual entry step after import",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "D",
+                    "text": "Feedback fields are only supported when feedbackBy is set to choice",
+                    "is_correct": false,
+                    "feedback": null
+                  }
+                ],
+                "correct_feedback": "Correct. When the run log shows no errors but fields are blank, the data was missing from the source file. The automation can only populate what exists in the input.",
+                "incorrect_feedback": "When automation completes without errors but fields are empty, focus on the source data first. The tool writes what the JSON contains — if a field is missing from the JSON it will be blank in the output.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Multiple Choice — Applied Scenario Feedback by Choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "multiple_choice",
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "Which combination of conditions produces the most reliable automation output?",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Accurate source data and no post-run validation",
+                    "is_correct": false,
+                    "feedback": "Accurate source data is necessary but not sufficient on its own. Skipping post-run validation means errors introduced during the automation process itself would go undetected."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Accurate, complete, consistent source data combined with post-run spot-checking",
+                    "is_correct": true,
+                    "feedback": "Correct. Clean source data across all four quality dimensions combined with post-run validation gives you the highest confidence in automation outputs."
+                  },
+                  {
+                    "label": "C",
+                    "text": "Fast execution speed and a detailed run log",
+                    "is_correct": false,
+                    "feedback": "Speed and logging are valuable but neither guarantees output quality. A fast run of bad data still produces bad outputs, even with a detailed log."
+                  },
+                  {
+                    "label": "D",
+                    "text": "Manual review of every output record after each run",
+                    "is_correct": false,
+                    "feedback": "Manual review of every record defeats the efficiency purpose of automation. Post-run spot-checking is the right balance between oversight and efficiency."
+                  }
+                ],
+                "correct_feedback": "Correct. Clean source data combined with post-run validation is the most reliable approach.",
+                "incorrect_feedback": "Think about what it takes both before and after a run to be confident in the outputs.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "True or False — Applied Standard Labels",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "true_false",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Determine whether each statement is <strong>True</strong> or <strong>False</strong> based on the concepts covered in this course.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "A run log that shows zero errors guarantees that all output fields were populated correctly.",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "B",
+                    "text": "Automation can resume from a specific lesson without reprocessing previously completed slides.",
+                    "is_correct": true,
+                    "feedback": null
+                  },
+                  {
+                    "label": "C",
+                    "text": "Correcting data errors after an automated run is always more efficient than preventing them.",
+                    "is_correct": false,
+                    "feedback": null
+                  },
+                  {
+                    "label": "D",
+                    "text": "Failure artifacts such as screenshots help diagnose what went wrong during an automated run.",
+                    "is_correct": true,
+                    "feedback": null
+                  }
+                ],
+                "correct_feedback": "Correct. You evaluated all four statements accurately.",
+                "incorrect_feedback": "Review the principles covered across all three lessons and consider the relationship between logs, data quality, and reliable outputs.",
+                "correct_score": 0,
+                "incorrect_score": 0,
+                "true_label": "True",
+                "false_label": "False"
+              },
+              {
+                "slide_name": "True or False — Applied Feedback by Choice Custom Labels",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "true_false",
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Select <strong>Supported</strong> or <strong>Not Supported</strong> for each feature based on what the LEAP Importer tool handles automatically.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Creating lesson titles inside LEAP before an import runs.",
+                    "is_correct": false,
+                    "feedback": "Not supported by the tool. Lesson titles must be created manually in LEAP before running an import. The tool creates slides inside existing lessons — it does not create the lessons themselves."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Automatically skipping slides that were already created in a previous run.",
+                    "is_correct": true,
+                    "feedback": "Supported. In Normal mode the tool reads the persistent run log and skips any slide that was already completed successfully in a previous run."
+                  },
+                  {
+                    "label": "C",
+                    "text": "Capturing a screenshot when a slide fails during an import.",
+                    "is_correct": true,
+                    "feedback": "Supported. When a slide fails the tool automatically captures a full-page screenshot and saves it to the run output folder for diagnostic review."
+                  },
+                  {
+                    "label": "D",
+                    "text": "Automatically deleting existing slides before recreating them in Rebuild mode.",
+                    "is_correct": false,
+                    "feedback": "Not supported. Rebuild mode recreates slides from scratch but does not delete existing ones first. Running Rebuild on a lesson that already has slides may produce duplicates."
+                  }
+                ],
+                "correct_feedback": "Correct. You accurately identified what the tool supports and what requires manual steps.",
+                "incorrect_feedback": "Review the tool capabilities covered in the user guide, particularly the differences between Normal and Rebuild modes.",
+                "correct_score": 0,
+                "incorrect_score": 0,
+                "true_label": "Supported",
+                "false_label": "Not Supported"
+              },
+              {
+                "slide_name": "Matching — Concepts to Scenarios",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "matching",
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Match each scenario to the concept it best illustrates.</p>",
+                "options": [
+                  { "label": "A", "text": "An import runs with no errors but feedback fields are blank on every slide", "match": "Source data was missing required fields" },
+                  { "label": "B", "text": "A second run skips all slides from the first run and only creates new ones", "match": "Normal mode using the persistent run log" },
+                  { "label": "C", "text": "A screenshot is saved showing a validation error in LEAP at the point of failure", "match": "Failure artifact captured during a run" },
+                  { "label": "D", "text": "All slides are recreated from scratch regardless of prior run history", "match": "Rebuild mode ignoring the run log" }
+                ],
+                "correct_feedback": "Correct. You matched every scenario to its corresponding automation concept.",
+                "incorrect_feedback": "Review the tool behavior covered in the user guide for each scenario.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Sort — Before and After an Import Run",
+                "display_type": "All Sites",
+                "flags": [],
+                "slide_type": "sorting",
+                "question_body": "<p>Sort each step into the correct phase of an import run.</p>",
+                "categories": ["Before the Run", "After the Run"],
+                "items": [
+                  { "label": "A", "text": "Create lesson titles in LEAP matching the JSON exactly", "correct_category": "Before the Run" },
+                  { "label": "B", "text": "Validate the JSON file for missing fields or formatting errors", "correct_category": "Before the Run" },
+                  { "label": "C", "text": "Confirm the correct course JSON file is loaded in the importer", "correct_category": "Before the Run" },
+                  { "label": "D", "text": "Spot-check a sample of slides in LEAP to confirm content accuracy", "correct_category": "After the Run" },
+                  { "label": "E", "text": "Download the run archive for audit and record keeping", "correct_category": "After the Run" },
+                  { "label": "F", "text": "Review any failure screenshots to diagnose what went wrong", "correct_category": "After the Run" }
+                ],
+                "correct_feedback": "Correct. You sorted every step into the right phase of the import workflow.",
+                "incorrect_feedback": "Think about whether each step is a preparation activity or a review activity.",
+                "correct_score": 0,
+                "incorrect_score": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "schema_version": "1.6",
+    "generated_by": "CE Shop Storyboard Parser",
+    "source_file": "test_automation_package.docx",
+    "generated_at": "2026-04-29T00:00:00.000Z",
+    "total_units": 3,
+    "total_lessons": 3,
+    "total_text_slides": 4,
+    "total_interactive_slides": 17,
+    "total_flags": 0,
+    "skipped": []
+  }
+}
