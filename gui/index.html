@@ -1066,7 +1066,9 @@
       case 'slide_fail':
         slideFail++;
         updateStats();
-        addLogEntry(`✗ ${entry.slideName}: ${entry.error}`, 'error');
+        // Display user-friendly message instead of raw error
+        const msg = entry.userMessage ? `${entry.userMessage} ${entry.suggestion ? '→ ' + entry.suggestion : ''}` : `✗ ${entry.slideName}: ${entry.error}`;
+        addLogEntry(`✗ ${msg}`, 'error');
         break;
       case 'login_waiting':
         setHeaderStatus('WAITING FOR LOGIN', 'warn');

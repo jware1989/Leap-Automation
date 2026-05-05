@@ -89,6 +89,92 @@ const SLIDE_TYPE_MAP = {
 // ============================
 // Helpers (identical to original script)
 // ============================
+// ============================
+// Error translation for plain-language user messages
+// ============================
+function translateError(err, context = {}) {
+  const errMsg = err.message || String(err);
+  const { slideName = '', slideType = '', lessonTitle = '' } = context;
+
+  // Pattern 1: Slide settings button timeout
+  if (/Timeout.*slide settings/i.test(errMsg) || /slide settings.*visible/i.test(errMsg)) {
+    return {
+      userMessage: `LEAP didn't show the Slide Settings button for '${slideName}'. The slide type may not have been set correctly.`,
+      suggestion: 'Delete the blank slide in LEAP, then run again from this lesson.',
+    };
+  }
+
+  // Pattern 2: Save button not activating
+  if (/Timeout.*Save.*disabled/i.test(errMsg) || /mat-raised-button.*not.*disabled/i.test(errMsg)) {
+    return {
+      userMessage: `The Save button didn't activate for '${slideName}'.`,
+      suggestion: 'Run again from this lesson — the tool will retry automatically.',
+    };
+  }
+
+  // Pattern 3: Dialog didn't close
+  if (/Timeout.*mat-dialog-container.*hidden/i.test(errMsg)) {
+    return {
+      userMessage: `The slide settings dialog didn't close for '${slideName}'. A required field may be empty.`,
+      suggestion: 'Check that all answer options have text in the JSON file for this slide, then run again.',
+    };
+  }
+
+  // Pattern 4: Login timing issue
+  if (/Timeout.*input.*first/i.test(errMsg) || /locator.*fill.*Timeout/i.test(errMsg)) {
+    return {
+      userMessage: 'The tool logged in but LEAP wasn\'t ready yet.',
+      suggestion: 'Run again — the login timing was off.',
+    };
+  }
+
+  // Pattern 5: Slide not found in list
+  if (/Timeout.*mat-list-option/i.test(errMsg) || /Slide not found/i.test(errMsg)) {
+    return {
+      userMessage: `Could not find '${slideName}' in the lesson slide list.`,
+      suggestion: 'Make sure this lesson is open in LEAP and the slide name in your JSON matches exactly what\'s in LEAP.',
+    };
+  }
+
+  // Pattern 6: Internal script errors
+  if (/page is not defined/i.test(errMsg) || /Cannot read properties of undefined/i.test(errMsg)) {
+    return {
+      userMessage: 'The tool encountered an internal error.',
+      suggestion: 'Restart the tool by closing the terminal and running start.bat again.',
+    };
+  }
+
+  // Pattern 7: Missing module
+  if (/MODULE_NOT_FOUND/i.test(errMsg)) {
+    return {
+      userMessage: 'A required file is missing.',
+      suggestion: 'Make sure all files are in the IMPORTER-APP folder and run start.bat again.',
+    };
+  }
+
+  // Pattern 8: Invalid JSON
+  if (/Unexpected token/i.test(errMsg) || /not valid JSON/i.test(errMsg)) {
+    return {
+      userMessage: 'The course file couldn\'t be read — it may be too large or incorrectly formatted.',
+      suggestion: 'Check that your JSON file is valid and under 10MB.',
+    };
+  }
+
+  // Pattern 9: Feedback-related errors
+  if (/feedbackBy|feedback/i.test(errMsg)) {
+    return {
+      userMessage: `There was a problem setting the feedback options for '${slideName}'.`,
+      suggestion: 'Run again from this lesson — this sometimes resolves on retry.',
+    };
+  }
+
+  // Pattern 10: Catch-all
+  return {
+    userMessage: `Something went wrong while creating '${slideName}' (${slideType}).`,
+    suggestion: 'Check the run log for details and try running again from this lesson.',
+  };
+}
+
 async function selectMatSelectOption(page, matSelect, optionLabel) {
   await matSelect.click();
   const panelId = await matSelect.getAttribute('aria-controls');
@@ -440,22 +526,28 @@ async function main() {
           const slideTypeSelect = page.locator('mat-select[formcontrolname="slideType"]').first();
           await slideTypeSelect.waitFor({ state: 'visible', timeout: 10000 });
 
-          // Select the slide type and verify it committed. If it didn't stick
-          // (empty string returned) retry once after a short wait.
-          // This handles the Angular form init race where the select is visible
-          // but the reactive form control hasn't finished wiring up yet.
-          await selectMatSelectOption(page, slideTypeSelect, slideTypeLabel);
-          await page.keyboard.press('Escape');
-          await clearOverlays(page);
-
-          const committedType = await slideTypeSelect
-            .locator('.mat-select-value-text').innerText().catch(() => '');
-          if (!committedType.trim()) {
-            // Value didn't commit -- wait for Angular to settle then retry once
-            await page.waitForTimeout(800);
+          // Retry up to 3 times to ensure the slide type commits correctly.
+          // Explicitly compares the committed value against expected slideTypeLabel
+          // to catch cases where the wrong type was committed (not just missing).
+          let typeCommitted = false;
+          for (let attempt = 1; attempt <= 3 && !typeCommitted; attempt++) {
             await selectMatSelectOption(page, slideTypeSelect, slideTypeLabel);
             await page.keyboard.press('Escape');
             await clearOverlays(page);
+            const committedType = await slideTypeSelect
+              .locator('.mat-select-value-text').innerText().catch(() => '');
+            if (committedType.trim() === slideTypeLabel) {
+              typeCommitted = true;
+            } else if (attempt < 3) {
+              // Log warning with expected vs found for debugging
+              emitLog(`Slide type retry: attempt ${attempt}/3 - expected "${slideTypeLabel}", got "${committedType.trim()}"`, 'warn');
+              await page.waitForTimeout(500);
+            }
+          }
+          if (!typeCommitted) {
+            const finalType = await slideTypeSelect
+              .locator('.mat-select-value-text').innerText().catch(() => '');
+            throw new Error(`Failed to set slide type to "${slideTypeLabel}" after 3 attempts. Final value: "${finalType.trim()}"`);
           }
 
           // OPEN SLIDE SETTINGS
@@ -503,6 +595,9 @@ async function main() {
               const before = await choiceInputs.count();
               await addBtn.click();
               await waitForCountIncrease(choiceInputs, before, 10000);
+              // Wait for the new input to be visible and interactive after count increased
+              await choiceInputs.nth(before).waitFor({ state: 'visible', timeout: 3000 });
+              await matchInputs.nth(before).waitFor({ state: 'visible', timeout: 3000 });
               await choiceInputs.nth(before).fill(slide.options[optionIndex].text);
               await matchInputs.nth(before).fill(slide.options[optionIndex].match);
             }
@@ -580,6 +675,8 @@ async function main() {
               await addQuestionBtn.scrollIntoViewIfNeeded().catch(() => {});
               await addQuestionBtn.click();
               await waitForCountIncrease(questionTextareas, before, 15000);
+              // Wait for the new textarea to be visible and interactive after count increased
+              await questionTextareas.nth(before).waitFor({ state: 'visible', timeout: 3000 });
             }
             for (let i = 0; i < slide.options.length; i++) {
               const opt = slide.options[i];
@@ -657,9 +754,13 @@ async function main() {
               const before = await choiceFields.count();
               await addChoiceBtn.click();
               await waitForCountIncrease(choiceFields, before, 10000);
+              // Wait for the new choice field to be visible and interactive after count increased
+              await choiceFields.nth(before).waitFor({ state: 'visible', timeout: 3000 });
               if (wantsChoiceFeedback) {
                 const fbCount = await feedbackFields.count();
                 if (fbCount <= before) await waitForCountIncrease(feedbackFields, fbCount, 10000).catch(() => {});
+                // Wait for the new feedback field to be visible and interactive after count increased
+                if (fbCount <= before) await feedbackFields.nth(fbCount).waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
               }
             }
             for (let i = 0; i < slide.options.length; i++) {
@@ -805,12 +906,21 @@ async function main() {
           try { await page.screenshot({ path: screenshotPath, fullPage: true }); } catch {}
           try { fs.writeFileSync(htmlPath, await page.content(), 'utf8'); } catch {}
 
+          // Translate the technical error to user-friendly message
+          const translated = translateError(err, {
+            slideName: slide.slide_name,
+            slideType: slide.slide_type,
+            lessonTitle: lessonTitle,
+          });
+
           emit({
             type: 'slide_fail',
             lessonTitle,
             slideName: slide.slide_name,
             slideType: slide.slide_type,
-            error: err.message,
+            error: err.message,                       // keep technical error for logs
+            userMessage: translated.userMessage,      // new plain language
+            suggestion: translated.suggestion,         // new action to take
             screenshotFile: path.basename(screenshotPath),
             htmlFile: path.basename(htmlPath),
           });
