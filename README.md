@@ -67,9 +67,9 @@ If you are picking up where a previous run stopped, select the lesson you want t
 
 ### Step 4 — Start the import
 
-Click **Start Import**. A browser window running LEAP will appear on your screen — this is the tool doing its work. Do not click inside it or interact with LEAP while the run is in progress.
+Click **Start Import**. A browser window running LEAP will appear on your screen — this is the tool doing its work. Do not click inside it or interact with the current lesson it's in. It's safe to work in a lesson after that lesson is done being created while the tool is still running. 
 
-Each slide takes roughly 5 to 15 seconds to create. A course with around 100 slides typically completes in 90 to 120 minutes.
+The dashboard will show live updates of the current unit, lesson and slides that are being created live with a progress bar that shows the percentage until import completes.
 
 ### Step 5 — Review your results
 
@@ -80,7 +80,7 @@ When the run finishes, the **Run History** panel will show whether it completed 
 - Click **Download** to save a full archive of the run
 - Click **Delete** to remove a run entry from the history list
 
-After every run, log in to LEAP and spot-check a sample of slides before sharing the course with anyone.
+After every run, check every lesson to make sure everything imported correctly add any remaining slides the importer doesn't create or skipped. Manually create and attach any resources, glossary terms, key points and images when available.
 
 ---
 
@@ -96,7 +96,7 @@ Open the Artifacts for that run to see a screenshot of what happened. Delete the
 Use the **Start From Lesson** dropdown to pick up from the lesson where it stopped. Run in Normal mode — completed slides will be skipped automatically.
 
 **Flags appeared after uploading my storyboard**
-A flag means the tool found a formatting issue in that slide. Common causes are a slide heading that uses the wrong text style in Word, a missing answer choice label, or a question with no correct answer marked. Review the flagged slides before starting the import and fix the issue in your storyboard, then re-upload.
+A flag means the tool found a formatting issue in that slide. Common causes are a slide heading that uses the wrong text style in Word, a missing answer choice label, or a question with no correct answer marked. Review the flagged slides before starting the import and fix the issue in your storyboard, then re-upload. It's easier to fix the issues here before the import begin to avoid possible issues to happen while the tool runs.
 
 **"Node.js not found" error**
 Node.js is not installed on your computer. Download and install it from [https://nodejs.org](https://nodejs.org), then try running the tool again.
