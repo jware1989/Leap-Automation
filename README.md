@@ -1,6 +1,9 @@
 # LEAP Course Importer
 
-A tool that automatically builds course content inside the LEAP learning management system. Instead of copying and pasting each slide by hand, you load your course file and the tool does the work for you.
+A tool that automatically builds course content inside the LEAP learning management system. Instead of copying and pasting each slide by hand, you load your course file and the tool will add the slides and content in a new Chrome browser.
+
+**Important**
+Do Not click inside the virtual Chrome browser while the tool is running, it's safe to minimize or drag the window around. Clicking inside the browser will stop the import, if this happens just run import again and it will pick up where last left off.
 
 ---
 
@@ -22,7 +25,7 @@ The importer fills in the content of your lessons but it cannot create the lesso
 
 **Mac:** Open the Terminal app, type `bash ` (with a space after it), then drag the **start.sh** file from the IMPORTER-APP folder into the Terminal window and press Enter.
 
-The first time you run it, the tool will spend about 1 to 2 minutes downloading a few things it needs. After that it opens automatically in your browser and is ready to use. You do not need to type any web address — it opens on its own.
+The first time you run it, the tool will spend about 1 to 2 minutes downloading a few things it needs. After that it opens automatically, if it doesn't just go to http://localhost:3000/
 
 > **Important:** A black terminal window will appear when you start the tool. Do not close it while you are using the importer. That window is what keeps the tool running. You can minimize it and leave it in the background.
 
@@ -38,18 +41,18 @@ The importer has three panels. Here is what each one does before you begin:
 | **Live Progress** | Center | Shows each slide being created in real time once a run starts |
 | **Run History** | Right side | A record of every run you have done, with options to view logs or download results |
 
-### Step 1 — Load your course file
+### Step 1a — Load your course file
 
 In the **Configuration** panel, drag your course file onto the upload area, or click it to browse for the file. The tool accepts two file types:
 
 - **.docx** — a Word storyboard document (the tool converts it automatically)
-- **.json** — a pre-built course package
+- **.json** — a pre-built course package (usually for testing)
 
 Once the file loads, the **Start From Lesson** dropdown will fill in with all the lessons from your file.
 
-> If you uploaded a storyboard, check the flag count that appears after it converts. A flag means the tool found something it could not read cleanly. Flagged slides will still be created but may need manual corrections in LEAP afterward.
+> If you uploaded a storyboard, check the flag count that appears after it converts. A flag means the tool found something it could not read cleanly. The import could potentially skip these slides if flagged items aren't addressed.
 
-### Step 2 — Choose a starting lesson (optional)
+### Step 1b — Choose a starting lesson (optional)
 
 Leave the **Start From Lesson** dropdown set to **All lessons from the beginning** for a normal full run.
 
