@@ -65,6 +65,18 @@ app.get('/api/history', (req, res) => {
 });
 
 // ============================
+// DELETE /api/history/:runId
+// ============================
+app.delete('/api/history/:runId', (req, res) => {
+  const { runId } = req.params;
+  const history = loadHistory();
+  const updated = history.filter(r => r.runId !== runId);
+  if (updated.length === history.length) return res.status(404).json({ error: 'Run not found' });
+  saveHistory(updated);
+  res.json({ ok: true, deleted: runId });
+});
+
+// ============================
 // GET /api/run/:runId/log
 // ============================
 app.get('/api/run/:runId/log', (req, res) => {

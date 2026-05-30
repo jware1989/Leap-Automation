@@ -49,10 +49,11 @@ function appendRunLog(entry) {
   }
 }
 
-function slideKey(lessonTitle, slideName) {
-  // Trim both values -- whitespace differences between JSON and log cause
-  // silent key mismatches that make Normal mode skip nothing
-  return `${(lessonTitle || '').trim()}\x00${(slideName || '').trim()}`;
+function slideKey(lessonTitle, slideName, slideType) {
+  // Include slideType so two slides with the same title but different types
+  // (e.g. a text slide and a multiple choice) are treated as distinct entries
+  // and neither is skipped because the other already completed.
+  return `${(lessonTitle || '').trim()}\x00${(slideName || '').trim()}\x00${(slideType || '').trim()}`;
 }
 
 function loadCompletedKeys() {
@@ -68,7 +69,7 @@ function loadCompletedKeys() {
     try {
       const rec = JSON.parse(line);
       if (rec.status === 'SUCCESS' && rec.lessonTitle && rec.slideName) {
-        completed.add(slideKey(rec.lessonTitle, rec.slideName));
+        completed.add(slideKey(rec.lessonTitle, rec.slideName, rec.slideType));
       }
     } catch {}
   }
@@ -84,104 +85,27 @@ const SLIDE_TYPE_MAP = {
   true_false: 'True/False',
   multiple_choice: 'Multiple Choice',
   sorting: 'Sort',
+  complete_the_story: 'Complete Story',
+  survey: 'Survey',
+  student_poll: 'Student Poll',
 };
 
 // ============================
 // Helpers (identical to original script)
 // ============================
-// ============================
-// Error translation for plain-language user messages
-// ============================
-function translateError(err, context = {}) {
-  const errMsg = err.message || String(err);
-  const { slideName = '', slideType = '', lessonTitle = '' } = context;
-
-  // Pattern 1: Slide settings button timeout
-  if (/Timeout.*slide settings/i.test(errMsg) || /slide settings.*visible/i.test(errMsg)) {
-    return {
-      userMessage: `LEAP didn't show the Slide Settings button for '${slideName}'. The slide type may not have been set correctly.`,
-      suggestion: 'Delete the blank slide in LEAP, then run again from this lesson.',
-    };
-  }
-
-  // Pattern 2: Save button not activating
-  if (/Timeout.*Save.*disabled/i.test(errMsg) || /mat-raised-button.*not.*disabled/i.test(errMsg)) {
-    return {
-      userMessage: `The Save button didn't activate for '${slideName}'.`,
-      suggestion: 'Run again from this lesson — the tool will retry automatically.',
-    };
-  }
-
-  // Pattern 3: Dialog didn't close
-  if (/Timeout.*mat-dialog-container.*hidden/i.test(errMsg)) {
-    return {
-      userMessage: `The slide settings dialog didn't close for '${slideName}'. A required field may be empty.`,
-      suggestion: 'Check that all answer options have text in the JSON file for this slide, then run again.',
-    };
-  }
-
-  // Pattern 4: Login timing issue
-  if (/Timeout.*input.*first/i.test(errMsg) || /locator.*fill.*Timeout/i.test(errMsg)) {
-    return {
-      userMessage: 'The tool logged in but LEAP wasn\'t ready yet.',
-      suggestion: 'Run again — the login timing was off.',
-    };
-  }
-
-  // Pattern 5: Slide not found in list
-  if (/Timeout.*mat-list-option/i.test(errMsg) || /Slide not found/i.test(errMsg)) {
-    return {
-      userMessage: `Could not find '${slideName}' in the lesson slide list.`,
-      suggestion: 'Make sure this lesson is open in LEAP and the slide name in your JSON matches exactly what\'s in LEAP.',
-    };
-  }
-
-  // Pattern 6: Internal script errors
-  if (/page is not defined/i.test(errMsg) || /Cannot read properties of undefined/i.test(errMsg)) {
-    return {
-      userMessage: 'The tool encountered an internal error.',
-      suggestion: 'Restart the tool by closing the terminal and running start.bat again.',
-    };
-  }
-
-  // Pattern 7: Missing module
-  if (/MODULE_NOT_FOUND/i.test(errMsg)) {
-    return {
-      userMessage: 'A required file is missing.',
-      suggestion: 'Make sure all files are in the IMPORTER-APP folder and run start.bat again.',
-    };
-  }
-
-  // Pattern 8: Invalid JSON
-  if (/Unexpected token/i.test(errMsg) || /not valid JSON/i.test(errMsg)) {
-    return {
-      userMessage: 'The course file couldn\'t be read — it may be too large or incorrectly formatted.',
-      suggestion: 'Check that your JSON file is valid and under 10MB.',
-    };
-  }
-
-  // Pattern 9: Feedback-related errors
-  if (/feedbackBy|feedback/i.test(errMsg)) {
-    return {
-      userMessage: `There was a problem setting the feedback options for '${slideName}'.`,
-      suggestion: 'Run again from this lesson — this sometimes resolves on retry.',
-    };
-  }
-
-  // Pattern 10: Catch-all
-  return {
-    userMessage: `Something went wrong while creating '${slideName}' (${slideType}).`,
-    suggestion: 'Check the run log for details and try running again from this lesson.',
-  };
-}
-
 async function selectMatSelectOption(page, matSelect, optionLabel) {
   await matSelect.click();
   const panelId = await matSelect.getAttribute('aria-controls');
   if (!panelId) throw new Error('Slide Type mat-select has no aria-controls');
   const panel = page.locator(`#${panelId}`);
   await panel.waitFor({ state: 'visible', timeout: 5000 });
-  await panel.locator('mat-option', { hasText: optionLabel }).click();
+  // Scroll the target option into view before clicking -- options near the
+  // bottom of long dropdowns (e.g. "Complete the Story") may be below the
+  // visible area and will timeout if clicked without scrolling first.
+  const option = panel.locator('mat-option', { hasText: optionLabel }).first();
+  await option.waitFor({ state: 'attached', timeout: 5000 });
+  await option.scrollIntoViewIfNeeded().catch(() => {});
+  await option.click();
   await panel.waitFor({ state: 'hidden', timeout: 5000 });
 }
 
@@ -418,7 +342,7 @@ async function main() {
       const totalSlidesInLesson = lessonSlides.length;
 
       if (!FORCE_REBUILD && totalSlidesInLesson > 0) {
-        const allDone = lessonSlides.every(s => completed.has(slideKey(lessonTitle, s.slide_name)));
+        const allDone = lessonSlides.every(s => completed.has(slideKey(lessonTitle, s.slide_name, s.slide_type)));
         if (allDone) {
           emitLog(`Skipping lesson (all slides complete): ${lessonTitle}`);
           emit({ type: 'lesson_skip', lessonTitle, lessonIndex, totalLessons, reason: 'all_slides_complete' });
@@ -437,7 +361,7 @@ async function main() {
         if (!slideTypeLabel) continue;
 
         slideIndex++;
-        const key = slideKey(lessonTitle, slide.slide_name);
+        const key = slideKey(lessonTitle, slide.slide_name, slide.slide_type);
 
         if (!FORCE_REBUILD && completed.has(key)) {
           emitLog(`Skipping completed: ${slide.slide_name}`);
@@ -467,7 +391,11 @@ async function main() {
               // Verify the full slide name matches exactly to avoid prefix collisions
               const candidateText = await candidate.textContent().catch(() => '');
               if (!candidateText.trim().includes(slide.slide_name.trim())) continue;
-              // Click to load the slide and verify the type matches
+              // Click to load the slide and verify the slide type matches.
+              // For duplicate-title slides (same name, different type) we must
+              // check ALL matching candidates -- not just the first one.
+              // The old code broke out after the first match regardless of type,
+              // which left LEAP showing the wrong slide and caused the delay.
               await clearOverlays(page);
               await candidate.click();
               const typeSelect = page.locator('mat-select[formcontrolname="slideType"]').first();
@@ -475,8 +403,10 @@ async function main() {
               const foundType = await typeSelect.locator('.mat-select-value-text').innerText().catch(() => '');
               if (foundType.trim() === slideTypeLabel) {
                 existingSlideItem = candidate;
+                break; // correct type found -- stop searching
               }
-              break;
+              // Type didn't match -- this is a different slide with the same title.
+              // Do NOT break -- continue checking remaining candidates.
             }
             if (existingSlideItem) break;
           }
@@ -526,28 +456,22 @@ async function main() {
           const slideTypeSelect = page.locator('mat-select[formcontrolname="slideType"]').first();
           await slideTypeSelect.waitFor({ state: 'visible', timeout: 10000 });
 
-          // Retry up to 3 times to ensure the slide type commits correctly.
-          // Explicitly compares the committed value against expected slideTypeLabel
-          // to catch cases where the wrong type was committed (not just missing).
-          let typeCommitted = false;
-          for (let attempt = 1; attempt <= 3 && !typeCommitted; attempt++) {
+          // Select the slide type and verify it committed. If it didn't stick
+          // (empty string returned) retry once after a short wait.
+          // This handles the Angular form init race where the select is visible
+          // but the reactive form control hasn't finished wiring up yet.
+          await selectMatSelectOption(page, slideTypeSelect, slideTypeLabel);
+          await page.keyboard.press('Escape');
+          await clearOverlays(page);
+
+          const committedType = await slideTypeSelect
+            .locator('.mat-select-value-text').innerText().catch(() => '');
+          if (!committedType.trim()) {
+            // Value didn't commit -- wait for Angular to settle then retry once
+            await page.waitForTimeout(800);
             await selectMatSelectOption(page, slideTypeSelect, slideTypeLabel);
             await page.keyboard.press('Escape');
             await clearOverlays(page);
-            const committedType = await slideTypeSelect
-              .locator('.mat-select-value-text').innerText().catch(() => '');
-            if (committedType.trim() === slideTypeLabel) {
-              typeCommitted = true;
-            } else if (attempt < 3) {
-              // Log warning with expected vs found for debugging
-              emitLog(`Slide type retry: attempt ${attempt}/3 - expected "${slideTypeLabel}", got "${committedType.trim()}"`, 'warn');
-              await page.waitForTimeout(500);
-            }
-          }
-          if (!typeCommitted) {
-            const finalType = await slideTypeSelect
-              .locator('.mat-select-value-text').innerText().catch(() => '');
-            throw new Error(`Failed to set slide type to "${slideTypeLabel}" after 3 attempts. Final value: "${finalType.trim()}"`);
           }
 
           // OPEN SLIDE SETTINGS
@@ -582,6 +506,9 @@ async function main() {
             await sourceBtn.click();
             const choiceInputs = settingsDialog.locator('textarea[aria-label="Choice"]');
             const matchInputs = settingsDialog.locator('textarea[aria-label="Match"]');
+
+            if (!Array.isArray(slide.options) || !slide.options.length) throw new Error('Matching slide has no options[].');
+
             let optionIndex = 0;
             const existingRows = await choiceInputs.count();
             for (; optionIndex < existingRows && optionIndex < slide.options.length; optionIndex++) {
@@ -595,9 +522,6 @@ async function main() {
               const before = await choiceInputs.count();
               await addBtn.click();
               await waitForCountIncrease(choiceInputs, before, 10000);
-              // Wait for the new input to be visible and interactive after count increased
-              await choiceInputs.nth(before).waitFor({ state: 'visible', timeout: 3000 });
-              await matchInputs.nth(before).waitFor({ state: 'visible', timeout: 3000 });
               await choiceInputs.nth(before).fill(slide.options[optionIndex].text);
               await matchInputs.nth(before).fill(slide.options[optionIndex].match);
             }
@@ -656,14 +580,17 @@ async function main() {
               await feedbackBySelect.waitFor({ state: 'visible', timeout: 10000 });
               await selectMatSelectOption(page, feedbackBySelect, 'Choice');
             }
-            if (slide.true_label && slide.true_label !== 'True') {
-              const trueLabel = settingsDialog.locator('input[aria-label="True Label"]').first();
-              if (await trueLabel.count().catch(() => 0)) await setMatInputValue(trueLabel, slide.true_label);
-            }
-            if (slide.false_label && slide.false_label !== 'False') {
-              const falseLabel = settingsDialog.locator('input[aria-label="False Label"]').first();
-              if (await falseLabel.count().catch(() => 0)) await setMatInputValue(falseLabel, slide.false_label);
-            }
+            // True Label -- aria-label="True Label" formcontrolname="trueLabel"
+            // Always fill both labels. LEAP requires them even when using defaults,
+            // and waitFor ensures Angular has rendered the fields before we write.
+            const trueLabelField = settingsDialog.locator('input[formcontrolname="trueLabel"]').first();
+            await trueLabelField.waitFor({ state: 'visible', timeout: 8000 });
+            await setMatInputValue(trueLabelField, slide.true_label || 'True');
+
+            // False Label -- aria-label="False Label" formcontrolname="falseLabel"
+            const falseLabelField = settingsDialog.locator('input[formcontrolname="falseLabel"]').first();
+            await falseLabelField.waitFor({ state: 'visible', timeout: 8000 });
+            await setMatInputValue(falseLabelField, slide.false_label || 'False');
             const addQuestionBtn = settingsDialog.getByRole('button', { name: /add question/i });
             await addQuestionBtn.waitFor({ state: 'visible', timeout: 10000 });
             if (!Array.isArray(slide.options) || slide.options.length === 0) throw new Error('True/False slide has no options[].');
@@ -675,8 +602,6 @@ async function main() {
               await addQuestionBtn.scrollIntoViewIfNeeded().catch(() => {});
               await addQuestionBtn.click();
               await waitForCountIncrease(questionTextareas, before, 15000);
-              // Wait for the new textarea to be visible and interactive after count increased
-              await questionTextareas.nth(before).waitFor({ state: 'visible', timeout: 3000 });
             }
             for (let i = 0; i < slide.options.length; i++) {
               const opt = slide.options[i];
@@ -684,7 +609,7 @@ async function main() {
               await q.scrollIntoViewIfNeeded().catch(() => {});
               await q.waitFor({ state: 'visible', timeout: 10000 });
               await q.fill(opt.text);
-              await clickTfRadioForQuestion(q, opt.is_correct ? 'true' : 'false');
+              await clickTfRadioForQuestion(q, (opt.is_correct || opt.correct) ? 'true' : 'false');
               if (slide.feedbackBy && String(slide.feedbackBy).toLowerCase() === 'choice' && opt.feedback) {
                 // The outerHTML shows Question+radios live in an inner fxlayout="row",
                 // which is a child of an fxlayout="column" div. The Feedback textarea
@@ -754,23 +679,19 @@ async function main() {
               const before = await choiceFields.count();
               await addChoiceBtn.click();
               await waitForCountIncrease(choiceFields, before, 10000);
-              // Wait for the new choice field to be visible and interactive after count increased
-              await choiceFields.nth(before).waitFor({ state: 'visible', timeout: 3000 });
               if (wantsChoiceFeedback) {
                 const fbCount = await feedbackFields.count();
                 if (fbCount <= before) await waitForCountIncrease(feedbackFields, fbCount, 10000).catch(() => {});
-                // Wait for the new feedback field to be visible and interactive after count increased
-                if (fbCount <= before) await feedbackFields.nth(fbCount).waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
               }
             }
             for (let i = 0; i < slide.options.length; i++) {
               const opt = slide.options[i];
               const cf = choiceFields.nth(i);
               await cf.fill(opt.text);
-              if (opt.is_correct === true) await clickCorrectCheckboxForChoice(cf);
+              if (opt.is_correct === true || opt.correct === true) await clickCorrectCheckboxForChoice(cf);
               if (wantsChoiceFeedback && opt.feedback) await feedbackFields.nth(i).fill(opt.feedback);
             }
-            if (!slide.options.some(o => o && o.is_correct === true)) throw new Error('Multiple choice requires at least one is_correct=true option.');
+            if (!slide.options.some(o => o && (o.is_correct === true || o.correct === true))) throw new Error('Multiple choice requires at least one correct option (is_correct or correct field).');
             // Question-level correct/incorrect feedback -- always written regardless
             // of feedbackBy mode. LEAP shows these fields in both question and choice
             // feedback modes simultaneously on the Multiple Choice dialog.
@@ -891,6 +812,325 @@ async function main() {
             await clearOverlays(page);
           }
 
+          // COMPLETE THE STORY SLIDE
+          if (slide.slide_type === 'complete_the_story') {
+            // Step 1: Build the story body with actual answers inside brackets.
+            // The storyboard stores [[Placeholder N]] in story_body with a
+            // separate placeholders[] array mapping each label to its answer.
+            // LEAP requires the actual answer text inside the brackets so that
+            // it auto-generates the Choice rows -- e.g. [[ownership interest]]
+            // not [[Placeholder 4]]. Swap every placeholder label for its answer.
+            let storyText = slide.story_body || '';
+            if (Array.isArray(slide.placeholders)) {
+              for (const ph of slide.placeholders) {
+                if (ph.placeholder && ph.answer) {
+                  // Replace [[Placeholder N]] with [[actual answer]]
+                  // Use a regex so spacing variations are handled
+                  // Simple literal replace -- split on exact placeholder string and rejoin
+                  storyText = storyText.split(ph.placeholder).join(`[[${ph.answer}]]`);
+                }
+              }
+            }
+            // Ensure all brackets are correct -- each answer must have exactly [[answer]]
+            emitLog(`  Story text prepared (${storyText.length} chars)`);
+
+            // Step 2: Paste story text into CKEditor source mode
+            const ckSourceBtn = settingsDialog.locator('button.ck-source-editing-button').first();
+            await ckSourceBtn.waitFor({ state: 'visible', timeout: 10000 });
+            await ckSourceBtn.click();
+            const ckTextarea = settingsDialog.locator('.ck-source-editing-area textarea, textarea.ck-source-editing-area').first()
+              .or(settingsDialog.locator('textarea').first());
+            await ckTextarea.waitFor({ state: 'visible', timeout: 10000 });
+            await ckTextarea.fill(storyText);
+            // Click source button again to switch back to rich text view.
+            // LEAP parses [[brackets]] and auto-generates Choice rows when
+            // switching from source mode back to rich text mode.
+            await ckSourceBtn.click();
+
+            // Step 3: Wait for LEAP to render the Choice input rows.
+            // LEAP generates one input[aria-label="Choice Text"] per [[bracket]] found.
+            const expectedChoices = (Array.isArray(slide.placeholders) ? slide.placeholders.length : 0);
+            if (expectedChoices > 0) {
+              await page.waitForFunction(
+                ([dialogSelector, expected]) => {
+                  const dialog = document.querySelector(dialogSelector);
+                  if (!dialog) return false;
+                  return dialog.querySelectorAll('input[aria-label="Choice Text"]').length >= expected;
+                },
+                ['mat-dialog-container', expectedChoices],
+                { timeout: 15000 }
+              ).catch(() => emitLog('  Warning: choice rows may not have fully rendered'));
+            }
+
+            // Step 4: Fill each Choice input with the answer text.
+            // The row label (left column) matches the answer we put in brackets.
+            // We fill by position since all inputs share aria-label="Choice Text".
+            const choiceInputs = settingsDialog.locator('input[aria-label="Choice Text"]');
+            const choiceCount = await choiceInputs.count().catch(() => 0);
+            emitLog(`  Found ${choiceCount} choice input(s)`);
+            for (let i = 0; i < choiceCount; i++) {
+              const input = choiceInputs.nth(i);
+              const currentVal = await input.inputValue().catch(() => '');
+              // If LEAP already populated the field from the bracket text, skip
+              if (currentVal.trim()) {
+                emitLog(`  Choice[${i}]: already filled ("${currentVal.substring(0,30)}")`);
+                continue;
+              }
+              // Otherwise find the matching answer by looking at the row label
+              // The label is a mat-label or span to the left of the input
+              const row = input.locator('xpath=ancestor::div[@fxlayout="row"][1]').or(
+                          input.locator('xpath=ancestor::div[contains(@class,"mat-form-field")]/ancestor::div[1]'));
+              const labelText = await row.locator('mat-label, label, span').first().innerText().catch(() => '');
+              const matchingPh = Array.isArray(slide.placeholders)
+                ? slide.placeholders.find(p => p.answer && p.answer.toLowerCase() === labelText.trim().toLowerCase())
+                : null;
+              const fillValue = matchingPh ? matchingPh.answer : (
+                Array.isArray(slide.placeholders) && slide.placeholders[i] ? slide.placeholders[i].answer : ''
+              );
+              if (fillValue) {
+                await fillAngularTextarea(input, fillValue);
+                emitLog(`  Choice[${i}]: filled "${fillValue.substring(0,40)}"`);
+              }
+            }
+
+            // Step 5: Fill correct/incorrect feedback
+            if (slide.correct_feedback) {
+              const correctFb = settingsDialog.locator('textarea[aria-label="Correct Feedback"], textarea[formcontrolname="correctFeedback"]').first();
+              if (await correctFb.count().catch(() => 0)) {
+                await correctFb.scrollIntoViewIfNeeded().catch(() => {});
+                await fillAngularTextarea(correctFb, slide.correct_feedback);
+              }
+            }
+            if (slide.incorrect_feedback) {
+              const incorrectFb = settingsDialog.locator('textarea[aria-label="Incorrect Feedback"], textarea[formcontrolname="incorrectFeedback"]').first();
+              if (await incorrectFb.count().catch(() => 0)) {
+                await incorrectFb.scrollIntoViewIfNeeded().catch(() => {});
+                await fillAngularTextarea(incorrectFb, slide.incorrect_feedback);
+              }
+            }
+
+            const okBtn = settingsDialog.locator('.mat-dialog-actions button.mat-primary', { hasText: 'OK' });
+            await okBtn.waitFor({ state: 'visible', timeout: 10000 });
+            await okBtn.click();
+            await settingsDialog.waitFor({ state: 'hidden', timeout: 15000 });
+            await clearOverlays(page);
+          }
+
+          // SURVEY SLIDE
+          if (slide.slide_type === 'survey') {
+            // Survey structure:
+            // - CKEditor at bottom = question/instructions body
+            // - Left panel = option list (click + Option to add each one)
+            // - Right panel = fields for selected option: Type, Text, Question
+            // - Child options = nested under a parent option via + Child Option
+            //
+            // Flow per option:
+            //   1. Click + Option (new row auto-selected)
+            //   2. Set Type dropdown (Button or Text)
+            //   3. Fill Text textarea (the button label)
+            //   4. Fill Question textarea (the follow-up response text)
+            //   5. If option has children: click + Child Option, fill same fields
+
+            // Step 1: Paste question body into CKEditor
+            const ckSourceBtn = settingsDialog.locator('button.ck-source-editing-button').first();
+            await ckSourceBtn.waitFor({ state: 'visible', timeout: 10000 });
+            await ckSourceBtn.click();
+            const ckTextarea = settingsDialog.locator('.ck-source-editing-area textarea').first()
+              .or(settingsDialog.locator('textarea.ck-source-editing-area').first());
+            await ckTextarea.waitFor({ state: 'visible', timeout: 10000 });
+            await ckTextarea.fill(slide.question_body || '');
+            await ckSourceBtn.click();
+            await page.waitForTimeout(300);
+
+            // Helper: fill the right-panel fields for the currently selected option
+            async function fillOptionFields(type, text, question) {
+              // Type dropdown -- mat-label is a SIBLING of mat-select inside
+              // mat-form-field, not a descendant. Filter on the mat-form-field
+              // parent that contains the "Type" label, then locate mat-select inside it.
+              const typeFormField = settingsDialog.locator('mat-form-field').filter({
+                has: page.locator('mat-label', { hasText: /^Type$/i })
+              }).first();
+              await typeFormField.waitFor({ state: 'visible', timeout: 8000 });
+              const typeSelect = typeFormField.locator('mat-select').first();
+              await typeSelect.waitFor({ state: 'visible', timeout: 5000 });
+              await selectMatSelectOption(page, typeSelect, type);
+
+              // Text field
+              if (text) {
+                const textField = settingsDialog.locator('textarea[aria-label="Text"]').first();
+                await textField.waitFor({ state: 'visible', timeout: 5000 });
+                await fillAngularTextarea(textField, text);
+              }
+
+              // Question field (follow-up response)
+              if (question) {
+                const questionField = settingsDialog.locator('textarea[aria-label="Question"]').first();
+                await questionField.waitFor({ state: 'visible', timeout: 5000 });
+                await fillAngularTextarea(questionField, question);
+              }
+            }
+
+            // Buttons -- distinguish + Option from + Child Option by text
+            const addOptionBtn = settingsDialog.getByRole('button', { name: /^\+\s*Option$/i }).first()
+              .or(settingsDialog.locator('button.mat-raised-button', { hasText: /^\s*Option\s*$/ }).first());
+            const addChildBtn  = settingsDialog.getByRole('button', { name: /child option/i }).first();
+
+            // Step 2: Process each top-level option
+            const choices = Array.isArray(slide.choices) ? slide.choices : [];
+            for (let i = 0; i < choices.length; i++) {
+              const choice = choices[i];
+
+              // Skip invalid or empty choices -- guards against Resources table
+              // rows leaking in (e.g. type='HTML_text') and blank template rows.
+              const validTypes = /^(button|text|link)$/i;
+              if (choice.type && !validTypes.test(choice.type)) {
+                emitLog(`  Option ${i + 1}: skipped invalid type "${choice.type}"`);
+                continue;
+              }
+              if (!choice.text || !choice.text.trim()) {
+                emitLog(`  Option ${i + 1}: skipped empty text`);
+                continue;
+              }
+
+              // Click + Option -- new row is auto-selected on the right panel
+              await addOptionBtn.scrollIntoViewIfNeeded().catch(() => {});
+              await addOptionBtn.click();
+              await page.waitForTimeout(400);
+
+              // Fill the right-panel fields for this option
+              await fillOptionFields(
+                choice.type || 'Button',
+                choice.text || '',
+                choice.question || ''
+              );
+              emitLog(`  Option ${i + 1}: ${choice.type || 'Button'} — "${(choice.text||'').substring(0,40)}"`);
+
+              // Step 3: Handle child options if present
+              if (Array.isArray(choice.children) && choice.children.length > 0) {
+                for (const child of choice.children) {
+                  await addChildBtn.scrollIntoViewIfNeeded().catch(() => {});
+                  await addChildBtn.click();
+                  await page.waitForTimeout(400);
+
+                  await fillOptionFields(
+                    child.type || 'Text',
+                    child.text || '',
+                    child.question || ''
+                  );
+                  emitLog(`    Child: ${child.type || 'Text'} — "${(child.text||'').substring(0,40)}"`);
+                }
+              }
+            }
+
+            const okBtn = settingsDialog.locator('.mat-dialog-actions button.mat-primary', { hasText: 'OK' });
+            await okBtn.waitFor({ state: 'visible', timeout: 10000 });
+            await okBtn.click();
+            await settingsDialog.waitFor({ state: 'hidden', timeout: 15000 });
+            await clearOverlays(page);
+          }
+
+          // STUDENT POLL SLIDE
+          if (slide.slide_type === 'student_poll') {
+            // Order matches top-to-bottom layout in LEAP:
+            // 1. Chart Title  (input at very top -- formcontrolname="chartTitle")
+            // 2. Question body (CKEditor -- source mode paste)
+            // 3. Feedback     (textarea below chart title)
+            // 4. Choices      (Add Choice rows -- Choice + Chart Label pairs)
+            // 5. Scroll to Chart section
+            // 6. Set Chart Type (mat-button-toggle: PieChart / BarChart / LineChart)
+            // 7. Scroll OK button into view and click it
+
+            // Step 1: Fill Chart Title first -- it's at the top of the dialog
+            if (slide.chart_title) {
+              const chartTitleField = settingsDialog
+                .locator('input[formcontrolname="chartTitle"], input[aria-label="Chart Title"]')
+                .first();
+              await chartTitleField.waitFor({ state: 'visible', timeout: 8000 });
+              await fillAngularTextarea(chartTitleField, slide.chart_title);
+              emitLog(`  Chart title: "${slide.chart_title}"`);
+            }
+
+            // Step 2: Fill question body via CKEditor source mode
+            if (slide.question_body) {
+              const ckSourceBtn = settingsDialog.locator('button.ck-source-editing-button').first();
+              await ckSourceBtn.waitFor({ state: 'visible', timeout: 10000 });
+              await ckSourceBtn.click();
+              const ckTextarea = settingsDialog.locator('.ck-source-editing-area textarea').first();
+              await ckTextarea.waitFor({ state: 'visible', timeout: 8000 });
+              await ckTextarea.fill(slide.question_body);
+              await ckSourceBtn.click();
+              await page.waitForTimeout(300);
+              emitLog(`  Question body: ${slide.question_body.length} chars`);
+            }
+
+            // Step 3: Fill Feedback
+            if (slide.feedback) {
+              const feedbackField = settingsDialog.locator('textarea[aria-label="Feedback"]').first();
+              await feedbackField.waitFor({ state: 'visible', timeout: 8000 });
+              await fillAngularTextarea(feedbackField, slide.feedback);
+            }
+
+            // Step 4: Add choices
+            const addChoiceBtn = settingsDialog.getByRole('button', { name: /add choice/i }).first();
+            const choices = Array.isArray(slide.choices) ? slide.choices : [];
+            for (let i = 0; i < choices.length; i++) {
+              const choice = choices[i];
+              if (!choice.text || !choice.text.trim()) continue;
+
+              await addChoiceBtn.scrollIntoViewIfNeeded().catch(() => {});
+              await addChoiceBtn.click();
+              await page.waitForTimeout(400);
+
+              // Fill the nth Choice and Chart Label pair
+              const choiceInputs = settingsDialog.locator('textarea[aria-label="Choice"]');
+              const labelInputs  = settingsDialog.locator('textarea[aria-label="Chart Label"]');
+
+              const choiceCount = await choiceInputs.count().catch(() => 0);
+              if (choiceCount > 0) {
+                const choiceField = choiceInputs.nth(choiceCount - 1);
+                await choiceField.waitFor({ state: 'visible', timeout: 5000 });
+                await fillAngularTextarea(choiceField, choice.text);
+              }
+              const labelCount = await labelInputs.count().catch(() => 0);
+              if (labelCount > 0 && choice.chart_label) {
+                const labelField = labelInputs.nth(labelCount - 1);
+                await labelField.waitFor({ state: 'visible', timeout: 5000 });
+                await fillAngularTextarea(labelField, choice.chart_label || choice.text);
+              }
+              emitLog(`  Choice ${i + 1}: "${(choice.text||'').substring(0,40)}"`);
+            }
+
+            // Step 5: Scroll down to the Chart section
+            await settingsDialog.locator('text=Chart').last().scrollIntoViewIfNeeded().catch(() => {});
+            await page.waitForTimeout(300);
+
+            // Step 6: Set chart type
+            const chartTypeMap = {
+              pie:  'PieChart',
+              bar:  'BarChart',
+              line: 'LineChart',
+            };
+            const rawType  = (slide.chart_type || 'pie').toLowerCase().trim();
+            const leapType = chartTypeMap[rawType] || 'PieChart';
+            const chartToggle = settingsDialog.locator(`mat-button-toggle[value="${leapType}"]`).first();
+            if (await chartToggle.count().catch(() => 0)) {
+              await chartToggle.scrollIntoViewIfNeeded().catch(() => {});
+              await chartToggle.click();
+              await page.waitForTimeout(300);
+              emitLog(`  Chart type: ${leapType}`);
+            }
+
+            // Step 7: Scroll OK into view then click -- ensures it's reachable
+            // regardless of where the dialog scroll position ended up
+            const okBtn = settingsDialog.locator('.mat-dialog-actions button.mat-primary', { hasText: 'OK' });
+            await okBtn.waitFor({ state: 'visible', timeout: 10000 });
+            await okBtn.scrollIntoViewIfNeeded().catch(() => {});
+            await page.waitForTimeout(200);
+            await okBtn.click();
+            await settingsDialog.waitFor({ state: 'hidden', timeout: 15000 });
+            await clearOverlays(page);
+          }
+
           // SAVE
           await saveWithRetry(page, 3);
 
@@ -906,26 +1146,22 @@ async function main() {
           try { await page.screenshot({ path: screenshotPath, fullPage: true }); } catch {}
           try { fs.writeFileSync(htmlPath, await page.content(), 'utf8'); } catch {}
 
-          // Translate the technical error to user-friendly message
-          const translated = translateError(err, {
-            slideName: slide.slide_name,
-            slideType: slide.slide_type,
-            lessonTitle: lessonTitle,
-          });
+          const translated = translateError(err, { slideName: slide.slide_name, slideType: slide.slide_type });
 
           emit({
             type: 'slide_fail',
             lessonTitle,
             slideName: slide.slide_name,
             slideType: slide.slide_type,
-            error: err.message,                       // keep technical error for logs
-            userMessage: translated.userMessage,      // new plain language
-            suggestion: translated.suggestion,         // new action to take
+            error: err.message,                        // technical -- goes to run log only
+            userMessage: translated.userMessage,       // plain language -- shown in GUI
+            suggestion: translated.suggestion,         // action to take -- shown in GUI
             screenshotFile: path.basename(screenshotPath),
             htmlFile: path.basename(htmlPath),
           });
 
-          appendRunLog({ lessonTitle, slideName: slide.slide_name, slideType: slide.slide_type, status: 'FAIL', error: err.message });
+          // Run log gets the full technical error for debugging
+          appendRunLog({ lessonTitle, slideName: slide.slide_name, slideType: slide.slide_type, status: 'FAIL', error: err.message, userMessage: translated.userMessage });
 
           await browser.close();
           process.exit(1);
@@ -939,6 +1175,81 @@ async function main() {
   emit({ type: 'run_complete', message: 'All lessons processed successfully.' });
   await browser.close();
   process.exit(0);
+}
+
+function translateError(err, context) {
+  const msg = (err.message || '').toLowerCase();
+  const slideName = context.slideName || 'this slide';
+  const slideType = context.slideType || '';
+
+  // Slide Settings button never appeared -- type not set or scroll issue
+  if (msg.includes('slide settings') || (msg.includes('timeout') && msg.includes('getbyro') && msg.includes('slide settings'))) {
+    return {
+      userMessage: `LEAP did not show the Slide Settings button for "${slideName}". The slide type may not have been set correctly.`,
+      suggestion: 'Delete the blank slide in LEAP then run again from this lesson.'
+    };
+  }
+  // Dropdown option not found or timed out -- likely needs scroll
+  if (msg.includes('mat-option') || msg.includes('locator.click') && msg.includes('panel')) {
+    return {
+      userMessage: `The slide type dropdown could not find or click the option for "${slideType}" on slide "${slideName}".`,
+      suggestion: 'This can happen when the option is off-screen in the dropdown. Run again — the scroll fix should handle it automatically.'
+    };
+  }
+  // Save button never enabled
+  if (msg.includes('save') && msg.includes('disabled')) {
+    return {
+      userMessage: `The Save button did not activate for "${slideName}".`,
+      suggestion: 'Run again from this lesson — the tool will retry automatically.'
+    };
+  }
+  // Settings dialog would not close -- validation error inside
+  if (msg.includes('dialog') && msg.includes('hidden')) {
+    return {
+      userMessage: `The slide settings dialog did not close for "${slideName}". A required field may be empty or invalid.`,
+      suggestion: 'Check that all fields in the JSON for this slide have valid content, then run again.'
+    };
+  }
+  // CKEditor or source textarea not found
+  if (msg.includes('ck-source') || msg.includes('source-editing')) {
+    return {
+      userMessage: `The content editor did not load correctly for "${slideName}".`,
+      suggestion: 'Run again from this lesson. If it keeps failing, check that the slide type is set to the correct type in LEAP.'
+    };
+  }
+  // Login / page not ready
+  if (msg.includes('locator.fill') && msg.includes('timeout') || msg.includes('login')) {
+    return {
+      userMessage: 'LEAP was not ready when the tool tried to start.',
+      suggestion: 'Run again and make sure you are fully logged in before the tool begins.'
+    };
+  }
+  // Module or file not found
+  if (msg.includes('cannot find module') || msg.includes('module_not_found')) {
+    return {
+      userMessage: 'A required file is missing.',
+      suggestion: 'Make sure all files are in the IMPORTER-APP folder and run start.bat again.'
+    };
+  }
+  // Sorting category mismatch
+  if (msg.includes('correct_category') || msg.includes('not in categories')) {
+    return {
+      userMessage: `A sort item in "${slideName}" has a category that does not match any category name exactly.`,
+      suggestion: 'Check that every correct_category value in the JSON exactly matches one of the categories[] entries — same spelling and capitalization.'
+    };
+  }
+  // Complete the Story bracket or choice issue
+  if (slideType === 'complete_the_story' || msg.includes('placeholder') || msg.includes('choice text')) {
+    return {
+      userMessage: `Something went wrong filling in the blanks for "${slideName}".`,
+      suggestion: 'Make sure the story_body text uses [[double brackets]] around each blank and that every placeholder has a matching answer in placeholders[].'
+    };
+  }
+  // Generic fallback
+  return {
+    userMessage: `Something went wrong while creating "${slideName}" (${slideType}).`,
+    suggestion: 'Check the run log for details and try running again from this lesson.'
+  };
 }
 
 main().catch(async err => {

@@ -1,0 +1,603 @@
+{
+  "course": {
+    "title": "AI and Automation Fundamentals",
+    "industry": "INDUSTRY_REAL_ESTATE",
+    "units": [
+      {
+        "unit_id": "unit_1",
+        "title": "Unit 1: Introduction to AI",
+        "lessons": [
+          {
+            "lesson_id": "lesson_1",
+            "title": "Test Automation - 1",
+            "lesson_objective": "*Understand the core concepts of AI and how it applies to everyday workflows.",
+            "industry": "INDUSTRY_REAL_ESTATE",
+            "estimated_minutes": 20,
+            "states": "",
+            "slides": [
+              {
+                "slide_name": "What Is Artificial Intelligence?",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "flags": [],
+                "content": "<p>Artificial intelligence (AI) refers to computer systems that perform tasks typically requiring human intelligence \u2014 recognizing patterns, making decisions, and learning from experience.</p><p>Core AI techniques include:</p><ul><li><strong>Machine Learning</strong> \u2014 Systems that improve by learning from data.</li><li><strong>Natural Language Processing</strong> \u2014 Machines that read and generate human language.</li><li><strong>Computer Vision</strong> \u2014 Machines that interpret images and video.</li><li><strong>Robotic Process Automation</strong> \u2014 Software that mimics human actions on digital systems.</li></ul>"
+              },
+              {
+                "slide_name": "Which AI Technique Fits?",
+                "slide_type": "multiple_choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>A hospital wants to automatically flag X-ray images showing signs of abnormality. Which AI technique is best suited for this task?</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Natural Language Processing",
+                    "is_correct": false,
+                    "feedback": "NLP works with text and speech, not images."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Computer Vision",
+                    "is_correct": true,
+                    "feedback": "Correct. Computer Vision analyzes images \u2014 exactly what is needed to scan X-rays."
+                  },
+                  {
+                    "label": "C",
+                    "text": "Robotic Process Automation",
+                    "is_correct": false,
+                    "feedback": "RPA automates repetitive digital tasks. It cannot interpret image content."
+                  },
+                  {
+                    "label": "D",
+                    "text": "Scheduled Automation",
+                    "is_correct": false,
+                    "feedback": "Scheduled Automation runs tasks on a timer. It has no ability to interpret visual data."
+                  }
+                ],
+                "correct_feedback": "Well done. Computer Vision is the right tool whenever the input is an image or video.",
+                "incorrect_feedback": "Think about what type of data is being analyzed. X-rays are images \u2014 the technique needs to interpret visual content.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "AI Always Replaces Human Workers",
+                "slide_type": "true_false",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "true_label": "Agree",
+                "false_label": "Disagree",
+                "question_body": "<p>AI and automation are designed to completely replace human workers across all roles, including creative, strategic, and interpersonal positions.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Agree",
+                    "is_correct": false
+                  },
+                  {
+                    "label": "B",
+                    "text": "Disagree",
+                    "is_correct": true
+                  }
+                ],
+                "correct_feedback": "Correct. AI augments human work rather than replacing it entirely. Creative judgment, empathy, and strategy remain distinctly human strengths.",
+                "incorrect_feedback": "Incorrect. AI handles repetitive and rule-based tasks well but cannot replicate human emotional intelligence or strategic thinking.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Match the AI Technique",
+                "slide_type": "matching",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Match each AI technique to the task it is best designed to handle.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Machine Learning",
+                    "match": "Predicting customer churn from historical purchase data"
+                  },
+                  {
+                    "label": "B",
+                    "text": "Natural Language Processing",
+                    "match": "Summarizing a contract into key bullet points"
+                  },
+                  {
+                    "label": "C",
+                    "text": "Computer Vision",
+                    "match": "Detecting defective products on a manufacturing line via camera"
+                  },
+                  {
+                    "label": "D",
+                    "text": "Robotic Process Automation",
+                    "match": "Copying invoice data from email into an accounting system"
+                  }
+                ],
+                "correct_feedback": "Well done. Each technique has a distinct strength \u2014 matching it to the right task is the first step in building an effective AI solution.",
+                "incorrect_feedback": "Review the four core AI techniques. Each is defined by the type of input it processes.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Sort These AI Applications",
+                "slide_type": "sorting",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Sort each application into the correct category based on whether it is a current AI capability or not yet reliably possible.</p>",
+                "categories": [
+                  "Current AI Capability",
+                  "Not Yet Reliably Possible"
+                ],
+                "items": [
+                  {
+                    "label": "A",
+                    "text": "Transcribing spoken meetings into searchable text",
+                    "correct_category": "Current AI Capability"
+                  },
+                  {
+                    "label": "B",
+                    "text": "Fully replacing a doctor's clinical judgment in all diagnoses",
+                    "correct_category": "Not Yet Reliably Possible"
+                  },
+                  {
+                    "label": "C",
+                    "text": "Detecting fraud across millions of transactions per second",
+                    "correct_category": "Current AI Capability"
+                  },
+                  {
+                    "label": "D",
+                    "text": "Forming genuine emotional relationships with users",
+                    "correct_category": "Not Yet Reliably Possible"
+                  }
+                ],
+                "correct_feedback": "Great work. Understanding what AI can reliably do today helps teams set realistic expectations.",
+                "incorrect_feedback": "Review current AI capabilities. Pattern recognition and language generation are well established. Genuine empathy and clinical judgment still require humans.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "How Are You Feeling About AI?",
+                "slide_type": "survey",
+                "display_type": "All Sites",
+                "flags": [],
+                "question_body": "<p>You have completed the Introduction to AI lesson. How are you feeling about the material?</p>",
+                "choices": [
+                  {
+                    "type": "Button",
+                    "text": "Confident and Ready",
+                    "question": "Great to hear. Keep that momentum going into the next lesson."
+                  },
+                  {
+                    "type": "Button",
+                    "text": "Mostly Clear",
+                    "question": "Good progress. Review the key concepts before continuing if anything felt uncertain."
+                  },
+                  {
+                    "type": "Button",
+                    "text": "Still Confused",
+                    "question": "That is okay. Tell us what was most confusing.",
+                    "children": [
+                      {
+                        "type": "Text",
+                        "text": "Which concept was most difficult to understand?",
+                        "question": "Thank you. Your input helps us improve how we explain these topics."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Button",
+                    "text": "Too Much at Once",
+                    "question": "Noted. We are always working to break these concepts into more digestible pieces."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "unit_id": "unit_2",
+        "title": "Unit 2: Automation in Practice",
+        "lessons": [
+          {
+            "lesson_id": "lesson_2",
+            "title": "Test Automation - 2",
+            "lesson_objective": "*Identify how automation tools are applied to real business workflows.",
+            "industry": "INDUSTRY_REAL_ESTATE",
+            "estimated_minutes": 20,
+            "states": "",
+            "slides": [
+              {
+                "slide_name": "How Automation Tools Work",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "flags": [],
+                "content": "<p>Automation tools connect software systems and trigger actions based on defined rules. When a condition is met the tool executes the next step without human involvement.</p><p>The four core automation patterns are:</p><ul><li><strong>Trigger-Action</strong> \u2014 A specific event starts a predefined workflow.</li><li><strong>Scheduled Automation</strong> \u2014 A task runs on a fixed schedule.</li><li><strong>Conditional Logic</strong> \u2014 The workflow branches based on data values.</li><li><strong>API Integration</strong> \u2014 Two systems share data automatically.</li></ul>"
+              },
+              {
+                "slide_name": "Identify the Automation Pattern",
+                "slide_type": "multiple_choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Every Friday at 6 AM a script runs automatically and sends each department head a summary of the week's open support tickets. No one manually starts this process. Which automation pattern does this represent?</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Trigger-Action",
+                    "is_correct": false
+                  },
+                  {
+                    "label": "B",
+                    "text": "Scheduled Automation",
+                    "is_correct": true
+                  },
+                  {
+                    "label": "C",
+                    "text": "Conditional Logic",
+                    "is_correct": false
+                  },
+                  {
+                    "label": "D",
+                    "text": "API Integration",
+                    "is_correct": false
+                  }
+                ],
+                "correct_feedback": "Correct. Scheduled Automation runs tasks at defined times without any triggering event.",
+                "incorrect_feedback": "The key is what starts the workflow \u2014 a fixed time schedule, not an event or condition.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Automation Eliminates All Errors",
+                "slide_type": "true_false",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "choice",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "true_label": "Fact",
+                "false_label": "Myth",
+                "question_body": "<p>Once a workflow is automated it becomes completely error-free, since machines do not make the kinds of mistakes that humans do.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Fact",
+                    "is_correct": false,
+                    "feedback": "This is a myth. Automations can fail when APIs change, data is malformed, or configurations drift."
+                  },
+                  {
+                    "label": "B",
+                    "text": "Myth",
+                    "is_correct": true,
+                    "feedback": "Correct. Automations reduce human error but introduce their own failure modes. Monitoring is essential."
+                  }
+                ],
+                "correct_feedback": "Correct. Automations reduce human error but require ongoing monitoring to catch silent failures.",
+                "incorrect_feedback": "Automations can fail when connected systems change. They are not inherently error-free.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Match the Automation Pattern",
+                "slide_type": "matching",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Match each business scenario to the automation pattern it best represents.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "New order submitted \u2014 confirmation email sent immediately",
+                    "match": "Trigger-Action"
+                  },
+                  {
+                    "label": "B",
+                    "text": "Database backup runs every night at 2 AM",
+                    "match": "Scheduled Automation"
+                  },
+                  {
+                    "label": "C",
+                    "text": "Urgent ticket routed to senior agent; standard ticket to normal queue",
+                    "match": "Conditional Logic"
+                  },
+                  {
+                    "label": "D",
+                    "text": "CRM updates instantly when a sale closes in billing",
+                    "match": "API Integration"
+                  }
+                ],
+                "correct_feedback": "Excellent. Recognizing which pattern fits a scenario is the first step in designing an effective workflow.",
+                "incorrect_feedback": "Review the four automation patterns. Each is defined by what starts the workflow and what logic decides the next step.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Complete the Automation Brief",
+                "slide_type": "complete_the_story",
+                "display_type": "All Sites",
+                "flags": [],
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Fill in the missing terms to complete this automation project brief.</p>",
+                "story_body": "<p>This automation will use a [[trigger]] to start when a customer submits a support request. The system will apply [[conditional logic]] to route tickets by priority. High-priority tickets go to [[senior agents]] while standard tickets enter the normal queue. All data syncs to our CRM via [[API integration]] in real time. The workflow will be tested in a [[staging environment]] before going live.</p>",
+                "placeholders": [
+                  {
+                    "placeholder": "[[trigger]]",
+                    "answer": "trigger"
+                  },
+                  {
+                    "placeholder": "[[conditional logic]]",
+                    "answer": "conditional logic"
+                  },
+                  {
+                    "placeholder": "[[senior agents]]",
+                    "answer": "senior agents"
+                  },
+                  {
+                    "placeholder": "[[API integration]]",
+                    "answer": "API integration"
+                  },
+                  {
+                    "placeholder": "[[staging environment]]",
+                    "answer": "staging environment"
+                  }
+                ],
+                "correct_feedback": "Well done. A clear automation brief aligns stakeholders before any build work begins.",
+                "incorrect_feedback": "Review the four automation patterns. Each blank represents a concept covered in this lesson."
+              },
+              {
+                "slide_name": "Which Automation Would You Build First?",
+                "slide_type": "student_poll",
+                "display_type": "All Sites",
+                "flags": [],
+                "multiple_answer": false,
+                "chart_title": "First Automation Priority",
+                "chart_type": "Bar",
+                "question_body": "<p>Your team has budget to build one automation this quarter. Which would you prioritize?</p>",
+                "choices": [
+                  {
+                    "number": 1,
+                    "text": "Automated onboarding emails when a new user signs up",
+                    "chart_label": "Onboarding Emails"
+                  },
+                  {
+                    "number": 2,
+                    "text": "Scheduled weekly report delivered to leadership automatically",
+                    "chart_label": "Weekly Reports"
+                  },
+                  {
+                    "number": 3,
+                    "text": "Support ticket routing based on urgency and topic",
+                    "chart_label": "Ticket Routing"
+                  },
+                  {
+                    "number": 4,
+                    "text": "Real-time CRM sync when a deal closes in billing",
+                    "chart_label": "CRM Sync"
+                  }
+                ],
+                "feedback": "All four are strong candidates. The right choice depends on where your team loses the most time today."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "unit_id": "unit_3",
+        "title": "Unit 3: AI Tools and Implementation",
+        "lessons": [
+          {
+            "lesson_id": "lesson_3",
+            "title": "Test Automation - 3",
+            "lesson_objective": "*Evaluate AI tools and plan a responsible, effective implementation.",
+            "industry": "INDUSTRY_REAL_ESTATE",
+            "estimated_minutes": 20,
+            "states": "",
+            "slides": [
+              {
+                "slide_name": "Choosing the Right AI Tool",
+                "slide_type": "text_slide",
+                "display_type": "All Sites",
+                "flags": [],
+                "content": "<p>Choosing the right AI tool requires a structured evaluation process. The wrong tool wastes budget. The right tool compounds in value over time.</p><p><strong>Key evaluation criteria:</strong></p><ul><li><strong>Fit for Purpose</strong> \u2014 Does the tool solve your specific problem?</li><li><strong>Integration</strong> \u2014 Does it connect with your existing systems?</li><li><strong>Scalability</strong> \u2014 Can it grow without dramatic cost increases?</li><li><strong>Security</strong> \u2014 How does the vendor handle your data?</li><li><strong>Support</strong> \u2014 Who owns the fix when something breaks?</li></ul><p>Start with a narrow pilot. One workflow, one team, one tool. Measure before expanding.</p>"
+              },
+              {
+                "slide_name": "Why Pilots Matter",
+                "slide_type": "multiple_choice",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>A company wants to deploy an AI writing assistant to all 200 employees immediately. A consultant recommends a 10-person pilot in one department first. What is the primary reason for the recommendation?</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "A pilot requires no vendor contract and costs less",
+                    "is_correct": false
+                  },
+                  {
+                    "label": "B",
+                    "text": "A pilot limits risk and generates real data before full rollout",
+                    "is_correct": true
+                  },
+                  {
+                    "label": "C",
+                    "text": "A pilot prevents employees from learning the tool too quickly",
+                    "is_correct": false
+                  },
+                  {
+                    "label": "D",
+                    "text": "A pilot is legally required for AI deployments over 50 users",
+                    "is_correct": false
+                  }
+                ],
+                "correct_feedback": "Correct. Pilots surface integration issues and adoption challenges before they affect the whole organization.",
+                "incorrect_feedback": "Review the implementation best practices. The value of a pilot is risk reduction and real-world learning.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Organizations Own AI Output Responsibility",
+                "slide_type": "true_false",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "true_label": "Correct",
+                "false_label": "Incorrect",
+                "question_body": "<p>When an AI tool produces harmful or misleading output, the organization that deployed it is responsible \u2014 even if the error originated in the vendor's underlying model.</p>",
+                "options": [
+                  {
+                    "label": "A",
+                    "text": "Correct",
+                    "is_correct": true
+                  },
+                  {
+                    "label": "B",
+                    "text": "Incorrect",
+                    "is_correct": false
+                  }
+                ],
+                "correct_feedback": "Right. Organizations are accountable for how they deploy AI. Vendor agreements typically disclaim liability for outputs.",
+                "incorrect_feedback": "Actually this is correct. The organization deploying the AI owns responsibility for its outputs.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Sort the Implementation Steps",
+                "slide_type": "sorting",
+                "display_type": "All Sites",
+                "flags": [],
+                "feedbackBy": "question",
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Sort each activity into the correct phase of an AI tool rollout.</p>",
+                "categories": [
+                  "Before Launch",
+                  "During Pilot",
+                  "After Full Rollout"
+                ],
+                "items": [
+                  {
+                    "label": "A",
+                    "text": "Define the specific problem the AI tool will solve",
+                    "correct_category": "Before Launch"
+                  },
+                  {
+                    "label": "B",
+                    "text": "Collect feedback from pilot users on what is working",
+                    "correct_category": "During Pilot"
+                  },
+                  {
+                    "label": "C",
+                    "text": "Establish a process for monitoring ongoing AI output quality",
+                    "correct_category": "After Full Rollout"
+                  },
+                  {
+                    "label": "D",
+                    "text": "Select a vendor and negotiate contract terms",
+                    "correct_category": "Before Launch"
+                  }
+                ],
+                "correct_feedback": "Well done. A structured rollout with clear phases reduces failed implementations.",
+                "incorrect_feedback": "Review the three rollout phases. Problem definition and vendor selection happen before any user touches the tool.",
+                "correct_score": 1,
+                "incorrect_score": 0
+              },
+              {
+                "slide_name": "Complete the Implementation Plan",
+                "slide_type": "complete_the_story",
+                "display_type": "All Sites",
+                "flags": [],
+                "score_by": "question",
+                "num_attempts": "Unlimited",
+                "question_body": "<p>Fill in the missing terms to complete this AI implementation plan summary.</p>",
+                "story_body": "<p>We will begin with a [[pilot program]] involving one team and one workflow. Success will be measured by tracking [[time saved]] versus our manual baseline. Before launch we will conduct a [[security review]] to verify the vendor meets our compliance requirements. Pilot users will receive [[training]] before the tool goes live. After the pilot we will [[iterate]] on the configuration before expanding to the full organization.</p>",
+                "placeholders": [
+                  {
+                    "placeholder": "[[pilot program]]",
+                    "answer": "pilot program"
+                  },
+                  {
+                    "placeholder": "[[time saved]]",
+                    "answer": "time saved"
+                  },
+                  {
+                    "placeholder": "[[security review]]",
+                    "answer": "security review"
+                  },
+                  {
+                    "placeholder": "[[training]]",
+                    "answer": "training"
+                  },
+                  {
+                    "placeholder": "[[iterate]]",
+                    "answer": "iterate"
+                  }
+                ],
+                "correct_feedback": "Well done. This plan reflects the structured approach that separates successful AI implementations from ones that fail.",
+                "incorrect_feedback": "Review the implementation best practices. Each blank reflects a required step in responsible AI deployment."
+              },
+              {
+                "slide_name": "Which Tool Would You Evaluate First?",
+                "slide_type": "student_poll",
+                "display_type": "All Sites",
+                "flags": [],
+                "multiple_answer": false,
+                "chart_title": "Top AI Tool Priority",
+                "chart_type": "Pie",
+                "question_body": "<p>Your organization is ready to evaluate its first AI tool. Which category would you prioritize?</p>",
+                "choices": [
+                  {
+                    "number": 1,
+                    "text": "AI writing assistant for content and communications",
+                    "chart_label": "Writing Assistant"
+                  },
+                  {
+                    "number": 2,
+                    "text": "Automated document processing and data entry",
+                    "chart_label": "Document Processing"
+                  },
+                  {
+                    "number": 3,
+                    "text": "AI-powered customer support chatbot",
+                    "chart_label": "Support Chatbot"
+                  },
+                  {
+                    "number": 4,
+                    "text": "Intelligent reporting and business intelligence",
+                    "chart_label": "Reporting and BI"
+                  }
+                ],
+                "feedback": "There is no universally correct answer. The right first tool depends on where your team spends the most time on low-value work."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "schema_version": "1.6",
+    "generated_by": "Manual Demo v5",
+    "description": "All 8 slide types across 3 lessons. MC x2 (feedbackBy question and choice), TF x3 (custom labels Agree/Disagree, Fact/Myth, Correct/Incorrect with feedbackBy question and choice), Matching x2, Sorting x2 (2-cat and 3-cat), CTS x2, Student Poll x2 (Bar and Pie), Survey x1 with child option."
+  }
+}
