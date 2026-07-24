@@ -49,18 +49,11 @@ function appendRunLog(entry) {
   }
 }
 
-function slideKey(lessonTitle, slideName, slideType, occurrence = 0) {
+function slideKey(lessonTitle, slideName, slideType) {
   // Include slideType so two slides with the same title but different types
   // (e.g. a text slide and a multiple choice) are treated as distinct entries
   // and neither is skipped because the other already completed.
-  //
-  // Include `occurrence` so two slides with the SAME title AND the SAME type in
-  // the same lesson are also distinct. occurrence is the 0-based position of this
-  // slide among all slides sharing the same (lesson, title, type) -- i.e. the
-  // first "Summary" text slide is 0, the second is 1, and so on. Without this,
-  // duplicate-titled slides collapse onto a single key and every copy after the
-  // first is wrongly treated as "already completed" and skipped.
-  return `${(lessonTitle || '').trim()}\x00${(slideName || '').trim()}\x00${(slideType || '').trim()}\x00#${occurrence}`;
+  return `${(lessonTitle || '').trim()}\x00${(slideName || '').trim()}\x00${(slideType || '').trim()}`;
 }
 
 function loadCompletedKeys() {
@@ -72,22 +65,11 @@ function loadCompletedKeys() {
     : RUN_LOG_PATH;
   if (!fs.existsSync(logToRead)) return completed;
   const lines = fs.readFileSync(logToRead, 'utf8').split(/\r?\n/).filter(Boolean);
-
-  // Reconstruct the occurrence index for each SUCCESS record. The log is
-  // append-only and written in slide order, so the Nth SUCCESS for a given
-  // (lesson, title, type) corresponds to occurrence N-1. We count as we go.
-  // This keeps old logs (which never stored an occurrence) working: a single
-  // "Summary" still maps to occurrence 0, and a second logged "Summary" maps
-  // to occurrence 1 -- matching the order the main loop assigns occurrences.
-  const seenCounts = new Map();
   for (const line of lines) {
     try {
       const rec = JSON.parse(line);
       if (rec.status === 'SUCCESS' && rec.lessonTitle && rec.slideName) {
-        const groupKey = `${(rec.lessonTitle || '').trim()}\x00${(rec.slideName || '').trim()}\x00${(rec.slideType || '').trim()}`;
-        const occ = seenCounts.get(groupKey) || 0;
-        seenCounts.set(groupKey, occ + 1);
-        completed.add(slideKey(rec.lessonTitle, rec.slideName, rec.slideType, occ));
+        completed.add(slideKey(rec.lessonTitle, rec.slideName, rec.slideType));
       }
     } catch {}
   }
@@ -203,13 +185,7 @@ async function findSlideOptionByKeys(page, fullTitle, timeout = 20000) {
   const listFallback = page.locator('mat-selection-list, .mat-selection-list').first();
   while (Date.now() - start < timeout) {
     for (const key of keys) {
-      // Use .last() rather than .first(): this helper runs right after a brand
-      // new slide is created, and the new slide is appended to the bottom of the
-      // list. If the lesson already contains an earlier slide with the same title
-      // (a duplicate), .first() would select that earlier twin and the new
-      // slide's content would be poured into the wrong slide -- leaving the new
-      // one blank. .last() always targets the most recently added match.
-      const candidate = page.locator('mat-list-option').filter({ hasText: key }).last();
+      const candidate = page.locator('mat-list-option').filter({ hasText: key }).first();
       if (await candidate.count().catch(() => 0)) {
         await candidate.scrollIntoViewIfNeeded().catch(() => {});
         if (await candidate.isVisible().catch(() => false)) return candidate;
@@ -366,16 +342,7 @@ async function main() {
       const totalSlidesInLesson = lessonSlides.length;
 
       if (!FORCE_REBUILD && totalSlidesInLesson > 0) {
-        // Occurrence-aware all-done check: walk the slides in order, assigning
-        // each one its occurrence index within its (title, type) group, and only
-        // skip the lesson if every individual occurrence is already completed.
-        const allDoneCounts = new Map();
-        const allDone = lessonSlides.every(s => {
-          const g = `${(s.slide_name || '').trim()}\x00${(s.slide_type || '').trim()}`;
-          const occ = allDoneCounts.get(g) || 0;
-          allDoneCounts.set(g, occ + 1);
-          return completed.has(slideKey(lessonTitle, s.slide_name, s.slide_type, occ));
-        });
+        const allDone = lessonSlides.every(s => completed.has(slideKey(lessonTitle, s.slide_name, s.slide_type)));
         if (allDone) {
           emitLog(`Skipping lesson (all slides complete): ${lessonTitle}`);
           emit({ type: 'lesson_skip', lessonTitle, lessonIndex, totalLessons, reason: 'all_slides_complete' });
@@ -389,23 +356,12 @@ async function main() {
 
       let slideIndex = 0;
 
-      // Track how many slides of each (title, type) we have processed so far in
-      // THIS lesson, so each slide gets a stable occurrence index. This is the
-      // counterpart to the reconstruction done in loadCompletedKeys().
-      const occurrenceCounts = new Map();
-
       for (const slide of lesson.slides) {
         const slideTypeLabel = SLIDE_TYPE_MAP[slide.slide_type];
         if (!slideTypeLabel) continue;
 
         slideIndex++;
-
-        // Assign this slide its occurrence index within its (title, type) group.
-        const groupKey = `${(slide.slide_name || '').trim()}\x00${(slide.slide_type || '').trim()}`;
-        const occurrence = occurrenceCounts.get(groupKey) || 0;
-        occurrenceCounts.set(groupKey, occurrence + 1);
-
-        const key = slideKey(lessonTitle, slide.slide_name, slide.slide_type, occurrence);
+        const key = slideKey(lessonTitle, slide.slide_name, slide.slide_type);
 
         if (!FORCE_REBUILD && completed.has(key)) {
           emitLog(`Skipping completed: ${slide.slide_name}`);
@@ -418,20 +374,14 @@ async function main() {
         try {
           await clearOverlays(page);
 
-          // CHECK IF THIS OCCURRENCE ALREADY EXISTS IN THE LESSON
-          // We count how many slides in LEAP match BOTH this full title AND this
-          // slide type. That count tells us how many occurrences already exist.
-          // This occurrence (0-based `occurrence`) is considered already built
-          // only if LEAP already holds at least `occurrence + 1` matching slides.
-          //
-          // The previous version treated ANY single title+type match as "already
-          // exists" and skipped -- which is exactly why the second, third, etc.
-          // slide sharing a title was never created. Counting matches instead of
-          // stopping at the first one lets every duplicate be built while still
-          // skipping occurrences that genuinely already exist from a prior run.
+          // CHECK IF SLIDE ALREADY EXISTS IN THE LESSON
+          // Searches by prefix/word keys then verifies BOTH the full slide name
+          // AND the slide type match before treating as existing.
+          // Full name check prevents prefix collisions (e.g. "Credit Freezes and
+          // Transactions" incorrectly matching "Credit Freezes and Transaction
+          // Disruptions" via the shared 28-char prefix).
           const slideMatchKeysList = slideMatchKeys(slide.slide_name);
-          let existingMatchCount = 0;
-          const countedTexts = new Set();
+          let existingSlideItem = null;
           for (const matchKey of slideMatchKeysList) {
             const candidates = page.locator('mat-list-option').filter({ hasText: matchKey });
             const count = await candidates.count().catch(() => 0);
@@ -439,45 +389,39 @@ async function main() {
               const candidate = candidates.nth(ci);
               if (!(await candidate.isVisible().catch(() => false))) continue;
               // Verify the full slide name matches exactly to avoid prefix collisions
-              // (e.g. "Credit Freezes" matching "Credit Freezes and Disruptions").
               const candidateText = await candidate.textContent().catch(() => '');
               if (!candidateText.trim().includes(slide.slide_name.trim())) continue;
-              // The two match keys (28-char prefix and first-6-words) can both hit
-              // the same list item; de-dupe by the item's text so we don't double
-              // count a single slide.
-              const dedupeText = candidateText.trim();
-              if (countedTexts.has(dedupeText + '#' + ci)) continue;
-
               // Click to load the slide and verify the slide type matches.
+              // For duplicate-title slides (same name, different type) we must
+              // check ALL matching candidates -- not just the first one.
+              // The old code broke out after the first match regardless of type,
+              // which left LEAP showing the wrong slide and caused the delay.
               await clearOverlays(page);
               await candidate.click();
               const typeSelect = page.locator('mat-select[formcontrolname="slideType"]').first();
               await typeSelect.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
               const foundType = await typeSelect.locator('.mat-select-value-text').innerText().catch(() => '');
               if (foundType.trim() === slideTypeLabel) {
-                countedTexts.add(dedupeText + '#' + ci);
-                existingMatchCount++;
+                existingSlideItem = candidate;
+                break; // correct type found -- stop searching
               }
+              // Type didn't match -- this is a different slide with the same title.
+              // Do NOT break -- continue checking remaining candidates.
             }
+            if (existingSlideItem) break;
           }
 
-          // This occurrence already exists in LEAP from a previous run.
-          const occurrenceAlreadyExists = existingMatchCount > occurrence;
-
-          if (!FORCE_REBUILD && occurrenceAlreadyExists) {
-            // Slide already exists in LEAP with the correct type and occurrence
-            // from a previous run. Skip settings dialog and save entirely --
-            // content is already correct. Re-filling identical content leaves the
-            // form pristine and Save disabled.
-            emitLog(`Slide already complete in lesson, skipping: ${slide.slide_name} (occurrence ${occurrence + 1})`);
+          if (existingSlideItem) {
+            // Slide already exists in LEAP with the correct type from a previous run.
+            // Skip settings dialog and save entirely -- content is already correct.
+            // Re-filling identical content leaves the form pristine and Save disabled.
+            emitLog(`Slide already complete in lesson, skipping: ${slide.slide_name}`);
             emit({ type: 'slide_skip', lessonTitle, slideName: slide.slide_name, reason: 'exists_in_lesson' });
             appendRunLog({ lessonTitle, slideName: slide.slide_name, slideType: slide.slide_type, status: 'SUCCESS', note: 'Skipped -- already exists in lesson' });
             completed.add(key);
             continue;
           } else {
-            // CREATE SLIDE SHELL -- always create a NEW slide for this occurrence.
-            // We never reuse an existing same-title slide here; duplicates are
-            // intentional and each gets its own freshly created slide.
+            // CREATE SLIDE SHELL
             await page.getByRole('button', { name: /new slide/i }).click();
             await page.waitForTimeout(300);
             await page.keyboard.press('Enter');
@@ -495,9 +439,6 @@ async function main() {
             await confirmNewSlideDialog(dialog, nameInput);
             await dialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
 
-            // findSlideOptionByKeys selects the LAST matching item -- the slide we
-            // just created -- so duplicate titles never cause us to land on an
-            // earlier twin and overwrite it.
             const slideItem = await findSlideOptionByKeys(page, slide.slide_name, 20000);
             await clearOverlays(page);
             await slideItem.scrollIntoViewIfNeeded().catch(() => {});
