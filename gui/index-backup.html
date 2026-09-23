@@ -1541,7 +1541,7 @@
   // ══════════════════════════════════════════════════════════════
   // STORYBOARD PARSER (ported from Storyboard-converter.html)
   // ══════════════════════════════════════════════════════════════
-  const AUTHORING_NOTE_RE = new RegExp('^(glossary\\s+term\\s*[-\\u2013\\u2014]?\\s*(new|revise|reuse)?|graphic\\s+details\\s+for\\s+conversion|graphic\\s+request|resources?|slide\\s+resources?|<insert\\s+image\\s+here>|alt\\s+text.*|type\\s+\\(image.*|type\\s+\\(request.*|type\\s+\\(html.*|type\\s+\\(standard.*|leap\\s+image\\s+resource\\s+title|leap\\s+resource\\s+title|placement\\s+notes.*|image\\s+location.*|if\\s+reuse.*|if\\s+new.*|exists\\s+in\\s+leap.*|important\\s+concept|difficult\\s+concept|content\\s+to\\s+include|visuals\\s+to\\s+include|recreate\\s+(this|something).*|location\\s*:?|link|html_text|title\\s+\\(35.*|^key$|^word$|^definition$|^example$|^industry$|add\\s+to\\s+all\\s+states.*|u\\.s\\.|^us$|(centered?|place|shown|float|above|below|left|right)\\s+.*|in\\s+between\\s+paragraph.*|^https?://\\S*$|\\S*\\.pdf|\\S*\\.docx|.*\\btranscript\\b.*|title\\s+of\\s+video.*|^(image|video|gif|audio|static|html_text)$|\\(ideally,.*|\\(insert\\s+or\\s+delete.*|\\(leap\\s+max.*|\\(as\\s+a\\s+resource\\)|resource\\s*:.*|^video\\s+script$|^standard$|^type$|^title$|^none$|^\\d+$)$','i');
+  const AUTHORING_NOTE_RE = new RegExp('^(glossary\\s+term\\s*[-\\u2013\\u2014]?\\s*(new|revise|reuse)?|graphic\\s+details\\s+for\\s+conversion|graphic\\s+request|resources?|slide\\s+resources?|<insert\\s+image\\s+here>|alt\\s+text.*|type\\s+\\(image.*|type\\s+\\(request.*|type\\s+\\(html.*|type\\s+\\(standard.*|leap\\s+image\\s+resource\\s+title|leap\\s+resource\\s+title|placement\\s+notes.*|image\\s+location.*|if\\s+reuse.*|if\\s+new.*|exists\\s+in\\s+leap.*|important\\s+concept|difficult\\s+concept|content\\s+to\\s+include|visuals\\s+to\\s+include|recreate\\s+(this|something).*|location\\s*:?|link|html_text|title\\s+\\(35.*|^key$|^word$|^definition$|^example$|^industry$|add\\s+to\\s+all\\s+states.*|u\\.s\\.|^us$|(centered?|place|shown|float|above|below|left|right)\\s+.*|in\\s+between\\s+paragraph.*|^https?://\\S*$|\\S*\\.pdf|\\S*\\.docx|.*\\btranscript\\b.*|title\\s+of\\s+video.*|^(image|video|gif|audio|static|html_text)$|\\(ideally,.*|\\(insert\\s+or\\s+delete.*|\\(leap\\s+max.*|\\(as\\s+a\\s+resource\\)|resource\\s*:.*|^video\\s+script$|^standard$|^type$|^title$|^none$|^\\d+$|^sequential\\s+e(q|xam)( question)?$|^final\\s+e(q|xam)( question)?$|^unit\\s+exam$)$','i');
   function getSkipBlockType(t){const r=t.trim();if(/^glossary\s+term\s*[-\u2013\u2014]?\s*(new|revise|reuse)?$/i.test(r))return'glossary';
     // "transcript" blocks run to the END of the slide's content region and must be
     // dropped entirely. "Title of Video - Video Transcript" is followed by the full
@@ -1556,7 +1556,7 @@
     // authoring-note regex, so its label leaked into the slide; add it here so it is
     // handled the same way as "Graphic Request" and "Graphic Details for Conversion".
     if(/^graphic\s+details\s+for\s+conversion$/i.test(r)||/^graphic\s+request$/i.test(r)||/^video\s+request$/i.test(r)||/^resources?$/i.test(r)||/^slide\s+resources?$/i.test(r))return'graphic';return null;}
-  function buildSlideContentMap(html){const map={};const re=/<h4[^>]*>[\s\S]*?[Tt]ext\s+[Ss]lide\s*:\s*([\s\S]*?)<\/h4>/g;let m;while((m=re.exec(html))!==null){const rawTitle=m[1].replace(/<[^>]+>/g,'').trim(),blockStart=m.index+m[0].length;let blockEnd=html.length;const hRe=/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;hRe.lastIndex=blockStart;let hMatch;while((hMatch=hRe.exec(html))!==null){const level=parseInt(hMatch[1]),hText=hMatch[2].replace(/<[^>]+>/g,'').trim();if(level<=2){blockEnd=hMatch.index;break;}if(level===3&&/^(new\s+lesson|unit\s+\d|text\s+slide|inquiry\s*:|sequential\s+eq|final\s+eq|key\s+points)/i.test(hText)){blockEnd=hMatch.index;break;}if(level>=4&&/^(text\s+slide|new\s+lesson|unit\s+\d|inquiry\s*:|sequential\s+eq|final\s+eq|key\s+points)/i.test(hText)){blockEnd=hMatch.index;break;}}{let _ps=blockStart;while(_ps<blockEnd){const _pi=html.indexOf('<p',_ps);if(_pi===-1||_pi>=blockEnd)break;const _pe=html.indexOf('>',_pi)+1;const _ptEnd=html.indexOf('</p>',_pe);const _pt=_ptEnd>-1?html.substring(_pe,_ptEnd).replace(/<[^>]+>/g,'').trim():'';if(/^(inquiry\s*:|text\s+slide\s*:|new\s+lesson\s*:|unit\s+\d|key\s+points|sequential\s+eq|final\s+eq)/i.test(_pt)){blockEnd=_pi;break;}_ps=_ptEnd>-1?_ptEnd+4:_ps+1;}}const cleaned=cleanHTMLBlock(html.substring(blockStart,blockEnd));const key=normalizeTitle(rawTitle);if(key){if(!map[key])map[key]=[];map[key].push(cleaned);}}const re2=/<p[^>]*>[^<]*[Tt]ext\s+[Ss]lide\s*:\s*([\s\S]*?)<\/p>/g;while((m=re2.exec(html))!==null){const rawTitle2=m[1].replace(/<[^>]+>/g,'').trim();const blockStart2=m.index+m[0].length;let blockEnd2=html.length;const hRe2=/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;hRe2.lastIndex=blockStart2;let hm2;while((hm2=hRe2.exec(html))!==null){const lv=parseInt(hm2[1]),ht=hm2[2].replace(/<[^>]+>/g,'').trim();if(lv<=2){blockEnd2=hm2.index;break;}if(lv===3&&/^(new\s+lesson|unit\s+\d|text\s+slide|inquiry\s*:|sequential\s+eq|final\s+eq|key\s+points)/i.test(ht)){blockEnd2=hm2.index;break;}if(lv>=4&&/^(text\s+slide|new\s+lesson|unit\s+\d|inquiry\s*:|sequential\s+eq|final\s+eq|key\s+points)/i.test(ht)){blockEnd2=hm2.index;break;}}{let _ps2=blockStart2;while(_ps2<blockEnd2){const _pi2=html.indexOf('<p',_ps2);if(_pi2===-1||_pi2>=blockEnd2)break;const _pe2=html.indexOf('>',_pi2)+1;const _pt2End=html.indexOf('</p>',_pe2);const _pt2=_pt2End>-1?html.substring(_pe2,_pt2End).replace(/<[^>]+>/g,'').trim():'';if(/^(inquiry\s*:|text\s+slide\s*:|new\s+lesson\s*:|unit\s+\d|key\s+points|sequential\s+eq|final\s+eq)/i.test(_pt2)){blockEnd2=_pi2;break;}_ps2=_pt2End>-1?_pt2End+4:_ps2+1;}}const cleaned2=cleanHTMLBlock(html.substring(blockStart2,blockEnd2));const key2=normalizeTitle(rawTitle2);if(key2){if(!map[key2])map[key2]=[];if(!map[key2].length)map[key2].push(cleaned2);}}return map;}
+  function buildSlideContentMap(html){const map={};const re=/<h4[^>]*>[\s\S]*?[Tt]ext\s+[Ss]lide\s*:\s*([\s\S]*?)<\/h4>/g;let m;while((m=re.exec(html))!==null){const rawTitle=m[1].replace(/<[^>]+>/g,'').trim(),blockStart=m.index+m[0].length;let blockEnd=html.length;const hRe=/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;hRe.lastIndex=blockStart;let hMatch;while((hMatch=hRe.exec(html))!==null){const level=parseInt(hMatch[1]),hText=hMatch[2].replace(/<[^>]+>/g,'').trim();if(level<=2){blockEnd=hMatch.index;break;}if(level===3&&/^(new\s+lesson|unit\s+\d|unit\s+exam|text\s+slide|inquiry\s*:|sequential\s+e(q|xam)|final\s+e(q|xam)|key\s+points)/i.test(hText)){blockEnd=hMatch.index;break;}if(level>=4&&/^(text\s+slide|new\s+lesson|unit\s+\d|unit\s+exam|inquiry\s*:|sequential\s+e(q|xam)|final\s+e(q|xam)|key\s+points)/i.test(hText)){blockEnd=hMatch.index;break;}}{let _ps=blockStart;while(_ps<blockEnd){const _pi=html.indexOf('<p',_ps);if(_pi===-1||_pi>=blockEnd)break;const _pe=html.indexOf('>',_pi)+1;const _ptEnd=html.indexOf('</p>',_pe);const _pt=_ptEnd>-1?html.substring(_pe,_ptEnd).replace(/<[^>]+>/g,'').trim():'';if(/^(inquiry\s*:|text\s+slide\s*:|new\s+lesson\s*:|unit\s+\d|key\s+points|sequential\s+eq|final\s+eq)/i.test(_pt)){blockEnd=_pi;break;}_ps=_ptEnd>-1?_ptEnd+4:_ps+1;}}const cleaned=cleanHTMLBlock(html.substring(blockStart,blockEnd));const key=normalizeTitle(rawTitle);if(key){if(!map[key])map[key]=[];map[key].push(cleaned);}}const re2=/<p[^>]*>[^<]*[Tt]ext\s+[Ss]lide\s*:\s*([\s\S]*?)<\/p>/g;while((m=re2.exec(html))!==null){const rawTitle2=m[1].replace(/<[^>]+>/g,'').trim();const blockStart2=m.index+m[0].length;let blockEnd2=html.length;const hRe2=/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;hRe2.lastIndex=blockStart2;let hm2;while((hm2=hRe2.exec(html))!==null){const lv=parseInt(hm2[1]),ht=hm2[2].replace(/<[^>]+>/g,'').trim();if(lv<=2){blockEnd2=hm2.index;break;}if(lv===3&&/^(new\s+lesson|unit\s+\d|text\s+slide|inquiry\s*:|sequential\s+eq|final\s+eq|key\s+points)/i.test(ht)){blockEnd2=hm2.index;break;}if(lv>=4&&/^(text\s+slide|new\s+lesson|unit\s+\d|inquiry\s*:|sequential\s+eq|final\s+eq|key\s+points)/i.test(ht)){blockEnd2=hm2.index;break;}}{let _ps2=blockStart2;while(_ps2<blockEnd2){const _pi2=html.indexOf('<p',_ps2);if(_pi2===-1||_pi2>=blockEnd2)break;const _pe2=html.indexOf('>',_pi2)+1;const _pt2End=html.indexOf('</p>',_pe2);const _pt2=_pt2End>-1?html.substring(_pe2,_pt2End).replace(/<[^>]+>/g,'').trim():'';if(/^(inquiry\s*:|text\s+slide\s*:|new\s+lesson\s*:|unit\s+\d|key\s+points|sequential\s+eq|final\s+eq)/i.test(_pt2)){blockEnd2=_pi2;break;}_ps2=_pt2End>-1?_pt2End+4:_ps2+1;}}const cleaned2=cleanHTMLBlock(html.substring(blockStart2,blockEnd2));const key2=normalizeTitle(rawTitle2);if(key2){if(!map[key2])map[key2]=[];if(!map[key2].length)map[key2].push(cleaned2);}}return map;}
   // Reverse the entity escaping Mammoth applies to angle brackets and ampersands
   // that were typed as literal text in the Word storyboard. &amp; is decoded LAST
   // so a sequence like &amp;lt; is not collapsed twice.
@@ -1618,7 +1618,7 @@
   // this is what prevents note tables (which often lead a slide block) from bypassing
   // the note-stripping logic. Returns the unescaped raw HTML, or null.
   const AUTO_HTML_ESCAPED_START_RE=/^\s*(?:<p[^>]*>\s*)?(?:<(?:strong|em)[^>]*>\s*)?&lt;([a-z][a-z0-9]*)(?:\s|&gt;|&#|&quot;)/i;
-  const AUTO_HTML_KNOWN_TAGS=new Set(['div','table','ul','ol','section','article','header','footer','nav','aside','figure','figcaption','p','span','h1','h2','h3','h4','h5','h6','dl','blockquote','pre','form','iframe','img','a','tbody','thead','tr']);
+  const AUTO_HTML_KNOWN_TAGS=new Set(['div','table','ul','ol','section','article','header','footer','nav','aside','figure','figcaption','p','span','h1','h2','h3','h4','h5','h6','dl','blockquote','pre','form','iframe','img','a','tbody','thead','tr','style','script']);
   function detectAutoRawHtml(rawHTML){
     const trimmed=rawHTML.replace(/^\s+/,'');
     const m=trimmed.match(AUTO_HTML_ESCAPED_START_RE);
@@ -1632,10 +1632,128 @@
       .replace(/<\/?p[^>]*>/gi,'')
       .replace(/<\/?strong[^>]*>/gi,'')
       .replace(/<\/?em[^>]*>/gi,'');
+    // Even when a block is treated as pasted raw HTML, Mammoth-embedded base64
+    // preview images are never intended content -- strip them (in both their escaped
+    // and already-real forms) so they don't leak through this passthrough path.
+    text=text
+      .replace(/&lt;img\b[^&]*?src\s*=\s*(?:&quot;|["'])data:[\s\S]*?&gt;/gi,'')
+      .replace(/<img\b[^>]*\bsrc\s*=\s*["']data:[^>]*>/gi,'');
     return unescapeHtmlEntities(text).trim();
   }
 
-  function cleanHTMLBlock(rawHTML){const _raw=extractRawHtmlBlock(rawHTML);if(_raw!==null)return normalizeUnicode(_raw);const _auto=detectAutoRawHtml(rawHTML);if(_auto!==null)return normalizeUnicode(_auto);const div=document.createElement('div');div.innerHTML=rawHTML;function isANT(table){const cells=table.querySelectorAll('td,th');if(!cells.length)return false;const first=cells[0].textContent.trim();if(/^(key|word|definition|example|industry|add\s+to\s+all\s+states|audience)$/i.test(first))return true;if(/graphic\s+(details|request)|glossary\s+term|leap\s+(image|resource)|placement\s+notes|image\s+location|type\s+\((image|request|html|standard)|resources?|slide\s+time/i.test(first))return true;if(AUTHORING_NOTE_RE.test(first))return true;const rows=table.querySelectorAll('tr');if(rows.length<2)return false;let allMeta=true;for(const row of rows){const rc=row.querySelectorAll('td,th');if(!rc.length)continue;const label=rc[0].textContent.trim();if(label.length>0&&!AUTHORING_NOTE_RE.test(label)&&!/^(key|word|definition|example|industry|audience|add\s+to\s+all\s+states|u\.s\.|us|none|title|type|location|link|static)$/i.test(label)){allMeta=false;break;}}return allMeta;}function cleanNode(parent){const toRemove=[];let skipType=null;for(const node of Array.from(parent.childNodes)){if(node.nodeType!==Node.ELEMENT_NODE)continue;const tag=node.tagName.toLowerCase(),text=node.textContent.trim();const blockType=/^(p|h[1-6])$/.test(tag)?getSkipBlockType(text):null;if(blockType){skipType=blockType;toRemove.push(node);continue;}if(skipType){if(skipType==='glossary'){toRemove.push(node);continue;}if(skipType==='transcript'){toRemove.push(node);continue;}if(tag==='p'&&text.length>=60&&!AUTHORING_NOTE_RE.test(text)){skipType=null;continue;}toRemove.push(node);continue;}if(/^(p|h[1-6])$/.test(tag)&&AUTHORING_NOTE_RE.test(text)){toRemove.push(node);continue;}if(tag==='table'){if(isANT(node)){toRemove.push(node);continue;}const tRows=node.querySelectorAll('tr');const tCols=tRows.length>0?tRows[0].querySelectorAll('td,th').length:0;if(tRows.length>1||tCols>1){node.style.borderCollapse='collapse';node.style.width='100%';node.style.marginBottom='12px';node.querySelectorAll('td,th').forEach(cell=>{cell.style.border='1px solid #c8bfb3';cell.style.padding='6px 10px';cell.style.verticalAlign='top';cell.style.lineHeight='1.5';});}continue;}}for(const node of toRemove)node.parentNode.removeChild(node);}cleanNode(div);const imgs=div.querySelectorAll('img');if(imgs.length>0){imgs.forEach(img=>img.parentNode.removeChild(img));const ph=document.createElement('p');ph.innerHTML='<strong>GRAPHIC PLACEHOLDER</strong>';div.appendChild(ph);}return normalizeUnicode(div.innerHTML.replace(/(<p[^>]*>\s*<br\s*\/?>\s*<\/p>)/gi,'').replace(/(<p[^>]*>\s*<\/p>)/gi,'').replace(/^\s+|\s+$/g,''));}
+  // Un-escape standalone HTML lines that appear ANYWHERE inside a slide block, not
+  // just at the start. Authors commonly write a paragraph of prose, then an inline
+  // <img> or <a> tag on its own line, then more prose. Mammoth escapes that tag
+  // (&lt;img ...&gt;) and wraps it in its own <p>, so without this it renders as
+  // literal text. Here we find any <p> whose entire content is a single escaped known
+  // tag (optionally inside <strong>/<em>) and replace that paragraph with the real,
+  // un-escaped HTML. Ordinary prose paragraphs are left untouched because they don't
+  // begin with an escaped known tag.
+  function inlineUnescapeHtmlLines(html){
+    return html.replace(/<p[^>]*>((?:\s|<\/?(?:strong|em)[^>]*>)*)&lt;([a-z][a-z0-9]*)([\s\S]*?)<\/p>/gi,
+      function(full,pre,tag,rest){
+        if(!AUTO_HTML_KNOWN_TAGS.has(tag.toLowerCase()))return full;
+        let inner='&lt;'+tag+rest;
+        inner=inner.replace(/<\/?(?:strong|em)[^>]*>/gi,'');
+        let real=unescapeHtmlEntities(inner).trim();
+        // Repair a malformed leading tag with an unterminated attribute value.
+        // Authors sometimes omit a closing quote (e.g. alt="...text.> instead of
+        // alt="...text."> ). Left as-is, the browser would treat everything after
+        // it -- the rest of the slide -- as part of that attribute, causing note
+        // tables and other content to be swallowed. If the leading tag contains an
+        // odd number of double quotes, insert the missing one before its ">".
+        const tm=real.match(/^<[a-z][a-z0-9]*[\s\S]*?>/i);
+        if(tm){const lead=tm[0];if(((lead.match(/"/g)||[]).length)%2===1){real=lead.replace(/>\s*$/,'">')+real.slice(lead.length);}}
+        return real;
+      });
+  }
+
+  // Un-escape and join a tail substring of a slide block into one continuous raw
+  // HTML string. Shares the same paragraph/line-boundary handling as
+  // extractRawHtmlBlock/detectAutoRawHtml: <p> boundaries and <br> become
+  // newlines, wrapper tags are stripped, then entities are unescaped as a whole
+  // so a multi-line pasted block (many separate Mammoth <p> fragments, one per
+  // original source line) is reassembled into valid markup instead of being
+  // unescaped paragraph-by-paragraph.
+  function unescapeMultilineHtmlTail(tailHTML){
+    let text=tailHTML
+      .replace(/<\/p>\s*<p[^>]*>/gi,'\n')
+      .replace(/<br\s*\/?>/gi,'\n')
+      .replace(/<\/?p[^>]*>/gi,'')
+      .replace(/<\/?strong[^>]*>/gi,'')
+      .replace(/<\/?em[^>]*>/gi,'');
+    return unescapeHtmlEntities(text).trim();
+  }
+
+  // Auto-detect raw HTML pasted WITHOUT [[HTML]] markers that starts partway
+  // through a slide block rather than at the very beginning. Authors commonly
+  // write a normal prose paragraph first, then paste a literal HTML/CSS
+  // component (e.g. an accordion widget starting with <style>) below it.
+  // detectAutoRawHtml only checks the start of the whole block, so it never
+  // fires in this case, and inlineUnescapeHtmlLines only unescapes a <p> whose
+  // ENTIRE content is a single self-contained tag -- it can't reassemble a
+  // block spanning dozens of <p> fragments, each one line of the original
+  // source. This scans every <p> in document order and, on the first one
+  // whose content begins with an escaped known tag, treats everything from
+  // there to the end of the block as one raw HTML payload. Returns
+  // {before, rawTail} on a match, or null if no mid-block trigger is found.
+  function extractMidBlockRawHtml(rawHTML){
+    const pRe=/<p[^>]*>([\s\S]*?)<\/p>/gi;
+    let pm;
+    while((pm=pRe.exec(rawHTML))!==null){
+      const inner=pm[1];
+      const trimmed=inner.replace(/^(?:\s|<\/?(?:strong|em)[^>]*>)+/i,'');
+      const tagMatch=trimmed.match(/^&lt;([a-z][a-z0-9]*)(?:\s|&gt;|&#|&quot;|\/)/i);
+      if(tagMatch&&AUTO_HTML_KNOWN_TAGS.has(tagMatch[1].toLowerCase())){
+        const triggerStart=pm.index;
+        return{
+          before:rawHTML.slice(0,triggerStart),
+          rawTail:unescapeMultilineHtmlTail(rawHTML.slice(triggerStart))
+        };
+      }
+    }
+    return null;
+  }
+
+  function cleanHTMLBlock(rawHTML){const _raw=extractRawHtmlBlock(rawHTML);if(_raw!==null)return normalizeUnicode(_raw);
+    const _mid=extractMidBlockRawHtml(rawHTML);
+    if(_mid!==null){
+      // Everything before the trigger paragraph is normal slide content -- run
+      // it through this same cleaner (the recursive call is safe and
+      // terminates: `before` by construction contains no trigger paragraph,
+      // so extractMidBlockRawHtml returns null on it and the call falls
+      // through to the normal cleaning path below). The raw tail is appended
+      // as-is, already unescaped and joined.
+      const cleanedBefore=cleanHTMLBlock(_mid.before);
+      return normalizeUnicode(cleanedBefore+_mid.rawTail);
+    }
+    // NOTE: We deliberately do NOT treat a block as fully raw HTML just because it
+    // starts with an escaped tag. Real slides often begin with an inline <img> but
+    // still contain production-note tables further down that must be stripped. Instead
+    // we un-escape inline HTML lines in place (below) and let the normal cleaner run.
+    // Explicit [[HTML]] markers (handled above) remain the way to force a whole-block
+    // passthrough. detectAutoRawHtml is retained for potential callers/tests but is no
+    // longer used here.
+    rawHTML=inlineUnescapeHtmlLines(rawHTML);
+    // Remove Mammoth-embedded base64 (data:) preview images up front, at the STRING
+    // level, before DOM parsing. These are thumbnails of note-table graphics, never
+    // intended slide content, and they can be multi-megabyte -- large enough that
+    // block-boundary slicing sometimes splits the tag, leaving a fragment the DOM
+    // parser would treat as text rather than an <img> (so a DOM-only strip would miss
+    // it). The regex catches the tag whole or split. Author images added via http(s)
+    // URLs are untouched.
+    rawHTML=rawHTML.replace(/<img\b[^>]*\bsrc\s*=\s*["']data:[^>]*>/gi,'').replace(/<img\b[^>]*\bsrc\s*=\s*["']data:[\s\S]*?(?:>|$)/gi,'');
+    const div=document.createElement('div');div.innerHTML=rawHTML;
+    // Belt-and-suspenders: also drop any empty-src or data: images that survived parsing.
+    Array.prototype.slice.call(div.querySelectorAll('img')).forEach(function(img){var src=(img.getAttribute('src')||'').trim();if(/^data:/i.test(src)||src===''){img.parentNode.removeChild(img);}});
+    function isANT(table){const cells=table.querySelectorAll('td,th');if(!cells.length)return false;const first=cells[0].textContent.trim();if(/^(key|word|definition|example|industry|add\s+to\s+all\s+states|audience)$/i.test(first))return true;if(/graphic\s+(details|request)|glossary\s+term|leap\s+(image|resource)|placement\s+notes|image\s+location|type\s+\((image|request|html|standard)|resources?|slide\s+time/i.test(first))return true;if(AUTHORING_NOTE_RE.test(first))return true;const rows=table.querySelectorAll('tr');if(rows.length<2)return false;let allMeta=true;for(const row of rows){const rc=row.querySelectorAll('td,th');if(!rc.length)continue;const label=rc[0].textContent.trim();if(label.length>0&&!AUTHORING_NOTE_RE.test(label)&&!/^(key|word|definition|example|industry|audience|add\s+to\s+all\s+states|u\.s\.|us|none|title|type|location|link|static)$/i.test(label)){allMeta=false;break;}}return allMeta;}function cleanNode(parent){const toRemove=[];let skipType=null;for(const node of Array.from(parent.childNodes)){if(node.nodeType!==Node.ELEMENT_NODE)continue;const tag=node.tagName.toLowerCase(),text=node.textContent.trim();const blockType=/^(p|h[1-6])$/.test(tag)?getSkipBlockType(text):null;if(blockType){skipType=blockType;toRemove.push(node);continue;}if(skipType){if(skipType==='glossary'){toRemove.push(node);continue;}if(skipType==='transcript'){toRemove.push(node);continue;}if(tag==='p'&&text.length>=60&&!AUTHORING_NOTE_RE.test(text)){skipType=null;continue;}toRemove.push(node);continue;}if(/^(p|h[1-6])$/.test(tag)&&AUTHORING_NOTE_RE.test(text)){toRemove.push(node);continue;}if(tag==='table'){if(isANT(node)){toRemove.push(node);continue;}const tRows=node.querySelectorAll('tr');const tCols=tRows.length>0?tRows[0].querySelectorAll('td,th').length:0;if(tRows.length>1||tCols>1){node.style.borderCollapse='collapse';node.style.width='100%';node.style.marginBottom='12px';node.querySelectorAll('td,th').forEach(cell=>{cell.style.border='1px solid #c8bfb3';cell.style.padding='6px 10px';cell.style.verticalAlign='top';cell.style.lineHeight='1.5';});}continue;}}for(const node of toRemove)node.parentNode.removeChild(node);}cleanNode(div);
+    // Strip only Mammoth's embedded base64 preview images (data: URIs) -- these are
+    // thumbnails of the note-table graphics and should become a placeholder. Real
+    // images the author added inline via http(s) URLs (e.g. LEAP-hosted assets) are
+    // intentional slide content and must be kept.
+    const previewImgs=Array.prototype.slice.call(div.querySelectorAll('img')).filter(function(img){var src=(img.getAttribute('src')||'').trim();return /^data:/i.test(src)||src==='';});
+    if(previewImgs.length>0){previewImgs.forEach(function(img){img.parentNode.removeChild(img);});const ph=document.createElement('p');ph.innerHTML='<strong>GRAPHIC PLACEHOLDER</strong>';div.appendChild(ph);}
+    return normalizeUnicode(div.innerHTML.replace(/(<p[^>]*>\s*<br\s*\/?>\s*<\/p>)/gi,'').replace(/(<p[^>]*>\s*<\/p>)/gi,'').replace(/^\s+|\s+$/g,''));}
   function stripTags(html){if(!html)return'';return html.replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').replace(/&#160;/g,' ').replace(/&#\d+;/g,'').replace(/\s{2,}/g,' ').trim();}
   function getTableRows(tableHTML){const rows=[];const rowRe=/<tr[^>]*>([\s\S]*?)<\/tr>/gi;let rm;while((rm=rowRe.exec(tableHTML))!==null){const cellRe=/<td[^>]*>([\s\S]*?)<\/td>/gi;const cells=[];let cm;while((cm=cellRe.exec(rm[1]))!==null)cells.push(stripTags(cm[1]));if(cells.length)rows.push(cells);}return rows;}
   function getQuestionBodyHTML(tables){const qRe=/question\/instructions/i;for(const tbl of tables){const rowRe=/<tr[^>]*>([\s\S]*?)<\/tr>/gi;let rm;while((rm=rowRe.exec(tbl))!==null){const cells=[];const cellRe=/<td[^>]*>([\s\S]*?)<\/td>/gi;let cm;while((cm=cellRe.exec(rm[1]))!==null)cells.push(cm[1]);if(cells.length>=2){const c0=cells[0].replace(/<[^>]+>/g,'').trim();if(/^question\s*\/\s*instructions/i.test(c0)){const raw=cells[1].trim();const text=raw.replace(/<[^>]+>/g,'').trim();if(text.length>5&&!/^&lt;|^<indicate|only needed if/i.test(text))return raw;}}}}return '';}
